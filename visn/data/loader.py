@@ -4,9 +4,11 @@ from typing import Union, List
 
 class BaseDataLoader(object):
     def __init__(self, *args, **kwargs) -> None:
+        # specific initialization to be handeled in 
+        # derived classes
         pass
 
-    def load(file_path: str, *args, **kwargs):
+    def load(self, file_path: str, *args, **kwargs):
         with open(file_path, "r") as f:
             data = f.read()
         return data
@@ -29,11 +31,13 @@ class ScanNetDataLoader(BaseDataLoader):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
     
-    def load(file_path, *args, **kwargs):
+    def load(self, file_path, *args, **kwargs):
         """
         loads a single file and returns a pytorch tensor or a numoy array
         """
         raise NotImplementedError()
 
 if __name__ == "__main__":
+    loader = BaseDataLoader()
     
+
