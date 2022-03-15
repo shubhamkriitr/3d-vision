@@ -6,9 +6,14 @@ USER vision
 WORKDIR /home/vision
 
 COPY requirements.txt ./
+ENV PATH "${PATH}:/home/vision/.local/bin"
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install tox
 
-COPY . .
+# make it more specific : [#TODO]
+COPY --chown=vision . .
 
 RUN pip install dist/*.tar.gz
+RUN python -m tox
+CMD ["bin/sh"]
