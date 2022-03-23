@@ -9,7 +9,6 @@ COPY requirements.txt ./
 ENV PATH "${PATH}:/home/vision/.local/bin"
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install tox
 
 # make it more specific : [#TODO]
 COPY --chown=vision . .
