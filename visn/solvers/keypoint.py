@@ -1,9 +1,10 @@
 
 import numpy as np
-import pycolmap
+# import pycolmap
 import cv2 as cv
 from PIL import Image, ImageOps
 
+pycolmap = None # FIXME
 # Adapters to use pycolmap/opencv for keypoints
 class KeyPointMatcher(object):
     def __init__(self, config):
@@ -49,7 +50,7 @@ class OpenCvKeypointMatcher(KeyPointMatcher):
 
 
 if __name__ == "__main__":
-    kpm1 = KeyPointMatcher({})
+    # kpm1 = KeyPointMatcher({})
     kpm2 = OpenCvKeypointMatcher({})
     def test_kpm(kpm):
         path1 = "res_/scene0000_00/rgb/224.png"
@@ -63,5 +64,5 @@ if __name__ == "__main__":
 
         keypoints_1 = None
     
-    test_kpm(kpm1)
+    # test_kpm(kpm1)
     test_kpm(kpm2)

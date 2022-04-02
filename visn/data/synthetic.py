@@ -11,13 +11,59 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
     def __init__(self) -> None:
         super(CameraPairDataGenerator, self).__init__()
     
-    def get_all(self):
+    def get_all(self, num_samples=None):
         rotation = Rotation.from_euler('zyx', [90, 0, 0], degrees=True)
-        rotation = rotation.as_matrix()
-        translation = np.array([[1], [2], [1]], dtype=np.float32)
+        rotation = rotation.as_matrix().astype(np.float64)
+        translation = np.array([[10], [20], [10]], dtype=np.float64)
         t_cross = self.get_a_cross(translation)
         essential_matrix = t_cross @ rotation
-        return rotation, translation, essential_matrix
+        
+        x1, x2 = self.generate_correspondences(rotation, translation,
+                                               num_samples)
+        return x1, x2, rotation, translation, essential_matrix
+    
+    def generate_correspondences(self, rotation_matrix, translation,
+                                 num_samples=None):
+        r = rotation_matrix
+        t = translation
+        p = np.concatenate([r, t], axis=1)
+        
+        # >>> x1 = np.random.randint(low=1, high=10, size=(num_samples, 3))
+        x1 = np.array(
+            [[0, 0, 1],
+             [0, 1, 1],
+             [0, 2, 1],
+             [1, 2, 1],
+             [2, 2, 1]], dtype=np.float64
+        ) # num_samples x 3
+        
+        # TODO: add random sampling
+        if num_samples is None:
+           x1 = np.array(
+            [[0, 0, 1],
+             [0, 1, 1],
+             [0, 2, 1],
+             [1, 2, 1],
+             [2, 2, 1],
+             [5, 5, 1],
+             [4, 4, 1],
+             [4, 8, 1]], dtype=np.float64
+        ) 
+        
+        ones = np.ones(shape=(x1.shape[0], 1), dtype=x1.dtype)
+        
+        x3d = np.concatenate([x1, ones], axis=1)
+        x2 = (p @ x3d.T ).T
+        
+        x2 = x2[:, :]/x2[:, 2:3]
+        
+        return x1, x2
+        
+        
+        
+        
+        
+        
     
     
 
@@ -28,7 +74,7 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
             raise AssertionError(f"`a` must be a 3 vector")
         return np.array([[0, -a[2], a[1]],
                          [a[2], 0, -a[0]],
-                         [-a[1], a[0], 0]], dtype=np.float32)
+                         [-a[1], a[0], 0]], dtype=np.float64)
         
 
 
