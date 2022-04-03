@@ -45,13 +45,13 @@ def test():
     estimator = PoseLibAdapter()
     x1, x2, rotation, translation, essential_matrix = datagen.get_all(
         num_samples=5)
-    x1, x2 = x1[0:4], x2[0:4]
+    # x1, x2 = x1[0:4], x2[0:4]
     ans1 = estimator.solve_5pt(x1, x2)
     
     x1, x2, rotation, translation, essential_matrix = datagen.get_all(
         num_samples=5)
     
-    x1, x2 = x1[0:4], x2[0:4]
+    # x1, x2 = x1[0:4], x2[0:4]
     ans2 = estimator.solve_5pt_ransac(x1, x2)
     
     x1, x2, rotation, translation, essential_matrix = datagen.get_all(
