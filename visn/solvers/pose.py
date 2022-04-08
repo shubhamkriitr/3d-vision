@@ -41,13 +41,18 @@ class PoseLibAdapter(object):
         _ = info2
         return info
     
+    def solve_upright_3pt(self, *args):
+        x2d_1, x2d_2 = args
+        info = poselib.relpose_upright_3pt(x2d_1, x2d_2)
+        return info
+    
     def to_list_of_nd_array(self, x):
         x_ = [] # TODO: replace with an optimal version
         for i in range(x.shape[0]):
             x_.append(x[i])
         return x_
 
-def Triangulation(x1,x2, rot, t):
+def triangulate(x1,x2, rot, t):
     if t.ndim == 1:
         t = t[:,np.newaxis]
     p = np.concatenate([rot, t], axis=1)
@@ -85,10 +90,10 @@ def test():
     # x1, x2 = x1[0:4], x2[0:4]
     ans1 = estimator.solve_5pt(x1, x2)
 
-    x1_3d,x2_3d = Triangulation(x1,x2,rotation,translation)
+    x1_3d,x2_3d = triangulate(x1,x2,rotation,translation)
 
     #for pose in ans1[0]:
-    #    x1_3d,x2_3d = Triangulation(x1,x2,pose.R,pose.t)
+    #    x1_3d,x2_3d = triangulate(x1,x2,pose.R,pose.t)
     #    n_positive = (x1_3d[:,2]>0) & (x2_3d[:,2]>0)
     #    print(pose.R)
     #    print(pose.t)
@@ -108,7 +113,7 @@ def test():
     ans3 = estimator.solve_5pt(x1, x2)
 
     #for pose in ans3[0]:
-    #    x1_3d,x2_3d = Triangulation(x1,x2,pose.R,pose.t)
+    #    x1_3d,x2_3d = triangulate(x1,x2,pose.R,pose.t)
     #    n_positive = (x1_3d[:,2]>0) & (x2_3d[:,2]>0)
     #    print(n_positive.sum())
     
@@ -119,6 +124,11 @@ def test():
     
     return [ans1, ans2, ans3, ans4]
 
+
+class TestUpright3PtSolver():
+    def test_upright_3pt_solver(self):
+        
+        
 if __name__ == "__main__":
     test()
     
