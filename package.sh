@@ -6,3 +6,5 @@ cmake -S . -B _build/ -DPYTHON_PACKAGE=ON -DWITH_BENCHMARK=ON -DCMAKE_INSTALL_PR
 cmake --build _build/ --target install -j 8
 cmake --build _build/ --target pip-package
 cmake --build _build/ --target install-pip-package
+pip uninstall poselib -y
+pip install _build/pybind/pip_package/poselib-*.whl
