@@ -2,7 +2,7 @@ import poselib
 import os
 import numpy as np
 print(os.getcwd())
-from synthetic import CameraPairDataGenerator
+from visn.data.synthetic import CameraPairDataGenerator
 
 
 default_ransac_options = poselib.RansacOptions()
@@ -32,6 +32,13 @@ class PoseLibAdapter(object):
                             x2d_1, x2d_2, cam1, cam2, poselib.RansacOptions(),
                             poselib.BundleOptions()
                             )
+        # Use this: https://gitlab.ethz.ch/kumarsh/poselib-3dv/-/tree/visn
+        # to build new poselib pybind
+        info2  = poselib.estimate_relative_pose_3pt_upright(
+                            x2d_1, x2d_2, cam1, cam2, poselib.RansacOptions(),
+                            poselib.BundleOptions()
+                            )
+        _ = info2
         return info
     
     def to_list_of_nd_array(self, x):

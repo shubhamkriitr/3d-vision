@@ -14,7 +14,9 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
     def get_all(self, num_samples=None):
         rotation = Rotation.from_euler('zyx', [90, 0, 0], degrees=True)
         rotation = rotation.as_matrix().astype(np.float64)
-        translation = np.array([[10], [20], [10]], dtype=np.float64)
+        camera_center_translation = np.array([[10], [20], [10]], dtype=np.float64)
+        # translation = - rotation @ camera_center_translation
+        translation = camera_center_translation
         t_cross = self.get_a_cross(translation)
         essential_matrix = t_cross @ rotation
         
@@ -31,23 +33,23 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
         # >>> x1 = np.random.randint(low=1, high=10, size=(num_samples, 3))
         x1 = np.array(
             [[0, 0, 1],
-             [0, 1, 1],
-             [0, 2, 1],
-             [1, 2, 1],
-             [2, 2, 1]], dtype=np.float64
+             [0, 1, 2],
+             [0, 2, 3],
+             [1, 2, 4],
+             [2, 2, 5]], dtype=np.float64
         ) # num_samples x 3
         
         # TODO: add random sampling
         if num_samples is None:
            x1 = np.array(
             [[0, 0, 1],
-             [0, 1, 1],
-             [0, 2, 1],
-             [1, 2, 1],
-             [2, 2, 1],
-             [5, 5, 1],
-             [4, 4, 1],
-             [4, 8, 1]], dtype=np.float64
+             [0, 1, 2],
+             [0, 2, 3],
+             [1, 2, 4],
+             [2, 2, 5],
+             [5, 5, 6],
+             [4, 4, 7],
+             [4, 8, 8]], dtype=np.float64
         ) 
         
         ones = np.ones(shape=(x1.shape[0], 1), dtype=x1.dtype)
