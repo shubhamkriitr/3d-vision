@@ -2,7 +2,9 @@ import poselib
 import os
 import numpy as np
 print(os.getcwd())
-from visn.data.synthetic import CameraPairDataGenerator
+from visn.data.synthetic import (CameraPairDataGenerator,
+    CameraPairDataGeneratorUpright3Pt)
+from visn.utils import logger
 
 
 default_ransac_options = poselib.RansacOptions()
@@ -127,9 +129,69 @@ def test():
 
 class TestUpright3PtSolver():
     def test_upright_3pt_solver(self):
+        estimator = PoseLibAdapter()
+        datagen = CameraPairDataGeneratorUpright3Pt()
+        x1, x2, rotation, translation, essential_matrix = datagen.get_all(
+        num_samples=3)
+        solutions = estimator.solve_upright_3pt(x1, x2)
+        solution_comparison_info = self.validate_upright_3pt_solution(
+            solutions, rotation, translation, essential_matrix
+        )
+        return {
+            "solutions": solutions,
+            "solution_comparison_info": solution_comparison_info,
+            "groundtruth": {
+                "rotation": rotation,
+                "translation": translation,
+                "essential_matrix": essential_matrix,
+                "x1": x1,
+                "x2": x2
+            }
+        }
+    
+    
+    def validate_upright_3pt_solution(self, solutions, rotation, translation,
+                                      essential_matrix):
+        logger.info(f"Number of solutions: {len(solutions)}")
+        solution_comparison_info = []
+        for idx, solution_pose in enumerate(solutions):
+            estimated_t = solution_pose.t
+            estimated_rotation = solution_pose.R
+            t_matched = self.check_translation(estimated_t, translation)
+            r_matched = self.check_rotation(estimated_rotation, rotation)
+            
+            logger.info(f"#[{idx}][`t` matched: {t_matched}]"
+                        f" ; [`R` matched: {r_matched}]")
+            solution_comparison_info.append(
+                {
+                    "t_matched": t_matched,
+                    "r_matched": r_matched
+                }
+            )
+        
+        return solution_comparison_info
+            
+    
+    def check_translation(self, estimated_t, actual_t):
+        actual_t = np.ravel(actual_t)
+        actual_t = actual_t/actual_t[-1]
+        estimated_t = estimated_t/estimated_t[-1]
+        
+        return np.allclose(estimated_t, actual_t)
+    
+    def check_rotation(self, estimated_rotation, actual_rotation):
+        assert np.allclose(abs(np.linalg.det(estimated_rotation)), 1.0)
+        assert np.allclose(abs(np.linalg.det(actual_rotation)), 1.0)
+        return np.allclose(estimated_rotation, actual_rotation)
+        
+        
+        
         
         
 if __name__ == "__main__":
-    test()
+    # test()
+    tester = TestUpright3PtSolver()
+    results = tester.test_upright_3pt_solver()
+    print(results)
     
         

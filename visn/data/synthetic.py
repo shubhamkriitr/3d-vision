@@ -58,7 +58,8 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
              [5, 5, 6],
              [4, 4, 7],
              [4, 8, 8]], dtype=np.float64
-        ) 
+             ) 
+           num_samples = x1.shape[0]
         
         ones = np.ones(shape=(x1.shape[0], 1), dtype=x1.dtype)
         
@@ -66,6 +67,10 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
         x2 = (p @ x3d.T ).T
         
         x2 = x2[:, :]/x2[:, 2:3]
+        
+        if x1.shape[0] > num_samples:
+            x1 = x1[0:num_samples]
+            x2 = x2[0:num_samples]
         
         return x1, x2
     
