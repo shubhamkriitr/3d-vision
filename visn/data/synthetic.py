@@ -8,14 +8,17 @@ class SyntheticDataGenerator(object):
     
 
 class CameraPairDataGenerator(SyntheticDataGenerator):
-    def __init__(self) -> None:
+    def __init__(self, config={}) -> None:
         super(CameraPairDataGenerator, self).__init__()
+        self.config = config # not being used currently TODO
     
-    def get_all(self, num_samples=None):
-        rotation = Rotation.from_euler('zyx', [90, 0, 0], degrees=True)
-        rotation = rotation.as_matrix().astype(np.float64)
+    def get_all(self, num_samples=None, rotation=None):
+        if rotation is None:
+            rotation = self.get_rotaion_matrix()
         camera_center_translation = np.array([[10], [20], [10]], dtype=np.float64)
-        # translation = - rotation @ camera_center_translation
+        # >>> translation = - rotation @ camera_center_translation
+        # is for the case when translation is done before rotation
+        # but looking at the results Poselib assumes Rotation then translation
         translation = camera_center_translation
         t_cross = self.get_a_cross(translation)
         essential_matrix = t_cross @ rotation
@@ -23,6 +26,11 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
         x1, x2 = self.generate_correspondences(rotation, translation,
                                                num_samples)
         return x1, x2, rotation, translation, essential_matrix
+    
+    def get_rotaion_matrix(self):
+        rotation = Rotation.from_euler('zyx', [90, 0, 0], degrees=True)
+        rotation = rotation.as_matrix().astype(np.float64)
+        return rotation
     
     def generate_correspondences(self, rotation_matrix, translation,
                                  num_samples=None):
@@ -60,15 +68,6 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
         x2 = x2[:, :]/x2[:, 2:3]
         
         return x1, x2
-        
-        
-        
-        
-        
-        
-    
-    
-
     
     def get_a_cross(self, a):
         a = np.ravel(a)
@@ -79,7 +78,16 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
                          [-a[1], a[0], 0]], dtype=np.float64)
         
 
-
+class CameraPairDataGeneratorUpright3Pt(CameraPairDataGenerator):
+    def __init__(self, config={}) -> None:
+        super().__init__(config)
+    
+    def get_rotaion_matrix(self):
+        # Poselib assumes the rotation is about y axis for upright 3 point case
+        rotation = Rotation.from_euler('zyx', [0, 90, 0], degrees=True)
+        rotation = rotation.as_matrix().astype(np.float64)
+        return rotation
+    
 if __name__ == "__main__":
     datagen = CameraPairDataGenerator()
     datagen.get_all()
