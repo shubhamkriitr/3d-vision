@@ -189,7 +189,7 @@ class TestUpright3PtSolver():
         
         
 if __name__ == "__main__":
-    # test()
+    test()
     tester = TestUpright3PtSolver()
     results = tester.test_upright_3pt_solver()
     print(results)

@@ -2,3 +2,4 @@ tox
 pytest
 coverage
 loguru
+open3d

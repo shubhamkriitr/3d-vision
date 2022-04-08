@@ -14,7 +14,7 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
     
     def get_all(self, num_samples=None, rotation=None):
         if rotation is None:
-            rotation = self.get_rotaion_matrix()
+            rotation = self.get_rotation_matrix()
         camera_center_translation = np.array([[10], [20], [10]], dtype=np.float64)
         # >>> translation = - rotation @ camera_center_translation
         # is for the case when translation is done before rotation
@@ -27,7 +27,7 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
                                                num_samples)
         return x1, x2, rotation, translation, essential_matrix
     
-    def get_rotaion_matrix(self):
+    def get_rotation_matrix(self):
         rotation = Rotation.from_euler('zyx', [90, 0, 0], degrees=True)
         rotation = rotation.as_matrix().astype(np.float64)
         return rotation
@@ -87,7 +87,7 @@ class CameraPairDataGeneratorUpright3Pt(CameraPairDataGenerator):
     def __init__(self, config={}) -> None:
         super().__init__(config)
     
-    def get_rotaion_matrix(self):
+    def get_rotation_matrix(self):
         # Poselib assumes the rotation is about y axis for upright 3 point case
         rotation = Rotation.from_euler('zyx', [0, 90, 0], degrees=True)
         rotation = rotation.as_matrix().astype(np.float64)
