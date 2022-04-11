@@ -1,0 +1,3 @@
+[submodule "UprightNet"]
+	path = UprightNet
+	url = https://github.com/burgern/UprightNet.git
