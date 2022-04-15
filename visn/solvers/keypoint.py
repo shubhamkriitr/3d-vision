@@ -1,8 +1,10 @@
 
+from time import sleep
 import numpy as np
 # import pycolmap
 import cv2 as cv
 from PIL import Image, ImageOps
+import matplotlib.pyplot as plt
 
 pycolmap = None # FIXME
 # Adapters to use pycolmap/opencv for keypoints
@@ -45,11 +47,35 @@ class OpenCvKeypointMatcher(KeyPointMatcher):
         img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
         return img
 
-
+def trial():
+    img1 = cv.imread('./visn/examples/images/0006.png')          # queryImage
+    img2 = cv.imread('./visn/examples/images/0005.png') # trainImage
+    # Initiate SIFT detector
+    sift = cv.SIFT_create()
+    # find the keypoints and descriptors with SIFT
+    kp1, des1 = sift.detectAndCompute(img1,None)
+    kp2, des2 = sift.detectAndCompute(img2,None)
+    # BFMatcher with default params
+    bf = cv.BFMatcher()
+    matches = bf.knnMatch(des1,des2,k=2)
+    # Apply ratio test
+    good = []
+    for m,n in matches:
+        if m.distance < 0.75*n.distance:
+            good.append([m])
+    # cv.drawMatchesKnn expects list of lists as matches.
+    img3 = cv.drawMatchesKnn(img1,kp1,img2,kp2,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    print("i am here")
+    plt.imshow(img3)
+    plt.show()
+    print("now i am here")
+    sleep(60)
 
 
 
 if __name__ == "__main__":
+    trial()
+    '''
     # kpm1 = KeyPointMatcher({})
     kpm2 = OpenCvKeypointMatcher({})
     def test_kpm(kpm):
@@ -66,3 +92,5 @@ if __name__ == "__main__":
     
     # test_kpm(kpm1)
     test_kpm(kpm2)
+    
+    '''

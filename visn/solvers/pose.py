@@ -4,6 +4,7 @@ import numpy as np
 print(os.getcwd())
 from visn.data.synthetic import (CameraPairDataGenerator,
     CameraPairDataGeneratorUpright3Pt)
+from visn.examples.fetch_example import get_matched_kps
 from visn.utils import logger
 
 
@@ -131,8 +132,7 @@ class TestUpright3PtSolver():
     def test_upright_3pt_solver(self):
         estimator = PoseLibAdapter()
         datagen = CameraPairDataGeneratorUpright3Pt()
-        x1, x2, rotation, translation, essential_matrix = datagen.get_all(
-        num_samples=3)
+        x1, x2, rotation, translation, essential_matrix = get_matched_kps() #datagen.get_all(num_samples=3)
         solutions = estimator.solve_upright_3pt(x1, x2)
         solution_comparison_info = self.validate_upright_3pt_solution(
             solutions, rotation, translation, essential_matrix
