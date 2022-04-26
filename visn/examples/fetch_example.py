@@ -193,7 +193,11 @@ def TriangulateCheck(K,R,t,im1,im2, matches):
   points3D_1 = points3D_2 @ np.append(R, np.expand_dims(t, 1), 1).transpose()
   
   return np.sum( (points3D_1[:,2]>0)&(points3D_2[:,2]>0) )
-  
+
+
+def get_k_matrix(data_folder = './visn/examples'):
+  return ReadKMatrix(data_folder)
+
 
 def get_matched_kps(selected_images = [6,5], data_folder = './visn/examples'):
 
