@@ -8,7 +8,7 @@ from visn.examples.fetch_example import get_matched_kps, get_k_matrix
 from visn.solvers.keypoint import OpenCvKeypointMatcher
 from visn.utils import logger
 import matplotlib.pyplot as plt
-
+from visn.benchmark.timing import benchmark_runtime
 
 default_ransac_options = poselib.RansacOptions()
 default_bundle_options = poselib.BundleOptions()

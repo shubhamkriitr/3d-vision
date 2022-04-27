@@ -68,6 +68,8 @@ class GroupedImagesDataset:
     def __init__(self, config = None, **kwargs) -> None:
         self.image_ids = None
         self.image_extension = None
+        self.metadata = "" # to be used later/ for specifying modalities and
+        # versions etc.
         self._init_from_config(config)
         self._inspect_data_rootdir()
     
@@ -116,11 +118,13 @@ class GroupedImagesDataset:
 
     def __getitem__(self, index: int):
         group = self.image_groups[index]
-        data = []
+        input_images = []
+        intrinsic_matrices = []
         for id_ in group:
             img, k = self.load_data_by_id(id_)
-            data.extend([img, k])
-        return data
+            input_images.append(img)
+            intrinsic_matrices.append(k)
+        return {"input_images": input_images, "K": intrinsic_matrices}
         
     
     def load_data_by_id(self, id_):
@@ -161,6 +165,7 @@ class SequentialDataLoader(object): # TODO: may use torch's loader instead
         batch_data = []
         for idx in range(start, self._num_samples_yieled):
             batch_data.append(self.dataset[idx])
+        return batch_data
             
         
 
