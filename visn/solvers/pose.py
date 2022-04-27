@@ -4,8 +4,11 @@ import numpy as np
 print(os.getcwd())
 from visn.data.synthetic import (CameraPairDataGenerator,
     CameraPairDataGeneratorUpright3Pt)
+from visn.examples.fetch_example import get_matched_kps, get_k_matrix
+from visn.solvers.keypoint import OpenCvKeypointMatcher
 from visn.utils import logger
-
+import matplotlib.pyplot as plt
+from visn.benchmark.timing import benchmark_runtime
 
 default_ransac_options = poselib.RansacOptions()
 default_bundle_options = poselib.BundleOptions()
@@ -131,8 +134,28 @@ class TestUpright3PtSolver():
     def test_upright_3pt_solver(self):
         estimator = PoseLibAdapter()
         datagen = CameraPairDataGeneratorUpright3Pt()
-        x1, x2, rotation, translation, essential_matrix = datagen.get_all(
-        num_samples=3)
+        x1, x2, rotation, translation, essential_matrix = get_matched_kps(selected_images = [6,5]) #datagen.get_all(num_samples=3)
+        
+        #rotation = np.float64([[1,0,0],[0,1,0],[0,0,1]])
+        #rotation = np.float64([[0.995,-0.09983,0],[0.09983,0.995,0],[0,0,1]])
+        #rotation = np.float64(rotation)
+        kpm = OpenCvKeypointMatcher({})
+        
+        # check image warp function
+        path1 = './visn/examples/images/0006.png' # queryImage
+        path2 = './visn/examples/images/0005.png' # trainImage
+        img1 = kpm.load_image(path1)
+        img2 = kpm.load_image(path2)
+        k = get_k_matrix()
+        img1_warp = kpm.warp_image(img1, rotation, k)
+        result = np.concatenate((img1_warp,img2), axis=1)
+        keypoints_1, keypoints_2 = kpm.get_matches(img1_warp,img2, 0.25) #you can use this point instead of x1,x2
+        plt.imshow(result, 'gray')
+        plt.show()
+
+        # check feature warp
+        x1 = kpm.warp_feature(x1, rotation)
+
         solutions = estimator.solve_upright_3pt(x1, x2)
         solution_comparison_info = self.validate_upright_3pt_solution(
             solutions, rotation, translation, essential_matrix

@@ -82,6 +82,42 @@ class CameraPairDataGenerator(SyntheticDataGenerator):
                          [a[2], 0, -a[0]],
                          [-a[1], a[0], 0]], dtype=np.float64)
         
+def FOVBoudaryPlanes(fov_x, fov_y, degress=True):
+    # 1 x 3
+    b0 = np.array([[ 1, 0,0]])
+    b1 = np.array([[-1, 0,0]])
+    b2 = np.array([[ 0, 1,0]])
+    b3 = np.array([[ 0,-1,0]])
+    # 3 x 3
+    r0 = Rotation.from_euler('xyz', [0, -fov_y/2, 0], degrees=degress)
+    r1 = Rotation.from_euler('xyz', [0,  fov_y/2, 0], degrees=degress)
+    r2 = Rotation.from_euler('xyz', [-fov_x/2, 0, 0], degrees=degress)
+    r3 = Rotation.from_euler('xyz', [ fov_x/2, 0, 0], degrees=degress)
+
+    # 3 x 1
+    b0 = r0@b0.T
+    b1 = r1@b1.T
+    b2 = r2@b2.T
+    b3 = r3@b3.T
+    # 3 x 4
+    return np.concatenate([b0,b1,b2,b3], axis=1)
+
+def TransformPoints(x1, r, t):
+        p = np.concatenate([r, t], axis=1)
+        ones = np.ones(shape=(x1.shape[0], 1), dtype=x1.dtype)
+        x3d = np.concatenate([x1, ones], axis=1)
+        x2 = (p @ x3d.T ).T
+        
+        x2 = x2[:, :]/x2[:, 2:3]
+        
+        return x2[:,:3]
+
+def CheckIsInFOV(points, fov_x, fov_y):
+    bound = FOVBoudaryPlanes(fov_x, fov_y)
+    return np.sum(points*bound > 0, axis = 1)
+
+
+
 
 class CameraPairDataGeneratorUpright3Pt(CameraPairDataGenerator):
     def __init__(self, config={}) -> None:
