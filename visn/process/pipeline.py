@@ -10,4 +10,7 @@ class BasePipeline:
             }
         else:
             self.config = config
-    
+
+
+if __name__ == "__main__":
+    pass

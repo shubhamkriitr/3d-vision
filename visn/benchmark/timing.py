@@ -4,7 +4,7 @@ import time
 
 
 def benchmark_runtime(f):
-    n = 100
+    n = 1000
     @wraps(f)
     def wrap(*args, **kw):
         total_time = 0
@@ -15,7 +15,7 @@ def benchmark_runtime(f):
             total_time += (end_ - start)
         
         logger.info(f"Function: {f.__name__} :: Avg. "
-                    f"execution time (in ns) [trials={n}] =  {total_time}")
+                    f"execution time (in ns) [trials={n}] =  {total_time/n}")
         
         
         return result
