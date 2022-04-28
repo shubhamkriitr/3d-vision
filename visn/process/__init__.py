@@ -1,5 +1,7 @@
 from visn.solvers.keypoint import OpenCvKeypointMatcher
 import numpy as np
+from typing import List
+from models import BaseGravityEstimator
 
 class BasePreprocessor(object):
     """This preprocessor works on image pairs. For more than 2 images in 
@@ -13,13 +15,15 @@ class BasePreprocessor(object):
     def _init_from_config(self, config):
         if config is None:
             self.config = {
-                "keypoint_matcher": "OpenCvKeypointMatcher" # use factory: TODO
+                "keypoint_matcher": "OpenCvKeypointMatcher", # use factory: TODO,
+                "gravity_estimator": "BaseGravityEstimator"
             }
         else:
             self.config = config
             
         assert self.config["keypoint_matcher"] == "OpenCvKeypointMatcher"
-        self.kpm = OpenCvKeypointMatcher()
+        self.kpm = OpenCvKeypointMatcher(config={})
+        self.gravity_estimator = BaseGravityEstimator()
         self.keypoint_threshold = 0.25
             
     def process(self, batch_):
@@ -36,13 +40,38 @@ class BasePreprocessor(object):
             keypoints_0, keypoints_1 = self.kpm.get_matches(
                 input_images[0], input_images[1], self.keypoint_threshold)
             
-            sample["stage.preprocess"] = {
+            normalized_keypoints = self.normalized_keypoints(k_inverse,
+                                    [keypoints_0, keypoints_1])
+            
+            
+            sample["__stage.preprocess"] = {
                 "K_inverse": k_inverse,
                 "keypoints": [keypoints_0, keypoints_1],
-                "normalized_keypoints": None ,
+                "normalized_keypoints": normalized_keypoints ,
             }
 
-    def normalized_keypoints(self, intrinsic_matrix : np.ndarray,
-                             keypoints: np.ndarray):
-        pass
+    def normalized_keypoints(self,
+                            k_inv_list: List[np.ndarray],
+                            images_keypoints: List[np.ndarray]):
+        """Assuming keypoints.shape (N, 2) # 
+        and `intrinsic_matrix` os shape (3, 3)
+        """
+        output = []
+        for image_idx in range(len(images_keypoints)):
+            keypoints = images_keypoints[image_idx]
+            intrinsic_matrix_inverse = k_inv_list[image_idx]
+            kp_homogeneous = np.concatenate(
+                [keypoints,np.ones(shape=(keypoints.shape[0], 1)
+                                    )], axis=1)
+            result = kp_homogeneous@intrinsic_matrix_inverse.T
+            
+            result = result / result[:, 2:3] # rescale
+            output.append(result[:, 0:2])  # non-homogenous
+        
+        return output
+    
+    @property
+    def estimate_gravity(self):
+        return self.gravity_estimator.estimate_gravity
+        
         

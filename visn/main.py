@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
-from xmlrpc.client import boolean
-
+from visn.process.pipeline import BasePipeline
+from visn.utils import logger
 class BaseCommandLineHandler:
     def __init__(self, name="main") -> None:
         self.name = name
@@ -13,6 +13,8 @@ class CommandLineHandlerV1(BaseCommandLineHandler):
         super().__init__(name)
         self.parser = ArgumentParser()
         self.parser.add_argument("--test", action="store_true")
+        self.parser.add_argument("--pipeline", "-P", type=str, 
+                                 default="BasePipeline")
 
     def handle(self):
         args = self.parser.parse_args()
@@ -20,6 +22,13 @@ class CommandLineHandlerV1(BaseCommandLineHandler):
             print("="*80+"\n"
             +"Improving relative pose estimation by estimating gravity\n"
             +"="*80+"\n")
+            return
+        pipeline = None
+        if args.pipeline == "BasePipeline":
+            pipeline = BasePipeline() # TODO read and pass config to it
+        
+        pipeline.run()
+        
 
 if __name__ == "__main__":
     handler = CommandLineHandlerV1()
