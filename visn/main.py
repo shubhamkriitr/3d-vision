@@ -27,7 +27,10 @@ class CommandLineHandlerV1(BaseCommandLineHandler):
         if args.pipeline == "BasePipeline":
             pipeline = BasePipeline() # TODO read and pass config to it
         
-        pipeline.run()
+        outputs = pipeline.run()
+        import pickle
+        with open('outputs.pickle', 'wb') as handle:
+            pickle.dump(outputs, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
 
 if __name__ == "__main__":

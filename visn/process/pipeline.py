@@ -25,9 +25,11 @@ class BasePipeline:
         
             
     def run(self):
+        outputs = []
         for data in self.dataloader:
             out_ = self.preprocessor.process(data)
-            out_
+            outputs.append(out_)
+        return outputs
 
 
 

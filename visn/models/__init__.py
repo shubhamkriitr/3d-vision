@@ -2,7 +2,7 @@ import numpy as np
 from typing import List, Dict, Union
 from types import SimpleNamespace
 # import torch
-torch = SimpleNamespace(**{"tensor": np.ndarray})
+torch = SimpleNamespace(**{"Tensor": str}) # for typing #FIXME
 
 
 class BaseGravityEstimator(object):
@@ -16,7 +16,7 @@ class BaseGravityEstimator(object):
         else:
             self.config = config 
     
-    def estimate_gravity(self, images: Union[np.ndarray, torch.tensor]):
+    def estimate_gravity(self, images: Union[np.ndarray, torch.Tensor]):
         """Estimate gravity vector in the global image coordinates.
 
         Args:

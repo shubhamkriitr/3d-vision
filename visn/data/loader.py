@@ -172,7 +172,7 @@ class SequentialDataLoader(object): # TODO: may use torch's loader instead
 if __name__ == "__main__":
     # loader = BaseDataLoader()
     dataset = GroupedImagesDataset()
-    loader = SequentialDataLoader(dataset=dataset, batch_size=2)
+    loader = SequentialDataLoader(dataset=dataset, batch_size=1)
     for idx, data in enumerate(loader):
         d = data
         print(data)

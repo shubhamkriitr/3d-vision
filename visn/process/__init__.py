@@ -43,12 +43,22 @@ class BasePreprocessor(object):
             normalized_keypoints = self.normalized_keypoints(k_inverse,
                                     [keypoints_0, keypoints_1])
             
+            gravity_vectors = self.estimate_gravity(
+                np.concatenate([np.expand_dims(img, axis=0) 
+                                for img in input_images], axis=0)
+            )
             
-            sample["__stage.preprocess"] = {
+            
+            sample["_stage_preprocess"] = {
                 "K_inverse": k_inverse,
                 "keypoints": [keypoints_0, keypoints_1],
                 "normalized_keypoints": normalized_keypoints ,
+                "gravity_vectors": gravity_vectors
             }
+            
+            output.append(sample)
+        
+        return output
 
     def normalized_keypoints(self,
                             k_inv_list: List[np.ndarray],
