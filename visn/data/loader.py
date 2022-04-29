@@ -134,7 +134,8 @@ class GroupedImagesDataset:
             k_path = self.data_rootdir/f"K.txt"
         k_intrinsic = self.load_intrinsic_matrix(k_path)
         img = cv.imread(image_path)
-        img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+        # return image as is (i.e. color)
+        # >>> img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
         return img, k_intrinsic
     
     def load_intrinsic_matrix(self, file_path):

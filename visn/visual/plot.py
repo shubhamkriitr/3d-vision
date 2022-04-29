@@ -8,6 +8,9 @@ import math
 DEFAULT_SUBPLOT_CODE = 111
 
 class BaseVisualizer:
+    def __init__(self) -> None:
+        self._id = 1
+    
     
     def get_new_subplot(self, plot_type="3d"):
         fig = plt.figure()
@@ -19,17 +22,17 @@ class BaseVisualizer:
         return ax
         
         
-    def plot_vectors(self, vectors, origins=None, length=1, ax=None, **kwargs):
+    def plot_vectors(self, vectors, origins=None, ranges=None, length=1, ax=None, **kwargs):
 
         if ax is None:
             ax = self.get_new_subplot()
         
         if origins is None:
             origins = np.zeros_like(vectors)
-
-        ranges_1 = self._compute_limits(origins + vectors)
-        ranges_2 = self._compute_limits(origins)
-        ranges = self._merge_limit_ranges(ranges_1, ranges_2)
+        if ranges is None:
+          ranges_1 = self._compute_limits(origins + vectors)
+          ranges_2 = self._compute_limits(origins)
+          ranges = self._merge_limit_ranges(ranges_1, ranges_2)
         
         ax.set_xlim(ranges[0])
         ax.set_ylim(ranges[1])
@@ -164,9 +167,9 @@ class BaseVisualizer:
 
       fig = plt.figure()
 
-      for idx in enumerate(images):
+      for idx, img in enumerate(images):
         ax = fig.add_subplot(grid_height, grid_width, idx+1)
-        ax.imshow(images[idx])
+        ax.imshow(img)
 
       plt.show(block=False)
 
@@ -191,11 +194,11 @@ class BaseVisualizer:
         ax = fig.add_subplot(DEFAULT_SUBPLOT_CODE)
       ax.imshow(image_pair)
       #plot keypoints
-      ax.plot(image_1.kps[:,0], image_1.kps[:,1], 'r.')
-      ax.plot(image_2.kps[:,0] + offset, image_2.kps[:,1], 'r.')
+      ax.plot(keypoints_1[:,0], keypoints_1[:,1], 'r.')
+      ax.plot(keypoints_2[:,0] + offset, keypoints_2[:,1], 'b.')
     
       # connect keypoints
-      for i in range(keypoints_1.shape):
+      for i in range(keypoints_1.shape[0]):
         ax.plot([keypoints_1[i][0], keypoints_2[i][0] + offset],
                 [keypoints_1[i][1], keypoints_2[i][1]], style,
                 linewidth=0.8)
