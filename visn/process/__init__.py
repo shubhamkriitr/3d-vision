@@ -2,6 +2,7 @@ from visn.solvers.keypoint import OpenCvKeypointMatcher
 import numpy as np
 from typing import List
 from visn.models import BaseGravityEstimator
+from scipy.spatial.transform import Rotation
 
 class BasePreprocessor(object):
     """This preprocessor works on image pairs. For more than 2 images in 
@@ -83,5 +84,25 @@ class BasePreprocessor(object):
     @property
     def estimate_gravity(self):
         return self.gravity_estimator.estimate_gravity
+    
+    def compute_alignment_rotation(self, source_vector, target_vector):
+        normal_unit_vector, theta = self.compute_alignment(source_vector,
+                                                           target_vector)
+        
+        # angle of rotation (`theta`) is required to be the magnitude
+        R = Rotation.from_rotvec(theta*normal_unit_vector) 
+        
+        return R.as_matrix() # check shape before using
+        # it can be either (3, 3) or (n, 3, 3) based on the input shape
+    
+    def compute_alignment(self, source_vector, target_vector):
+        normal_vector = np.cross(source_vector, target_vector)
+        normal_unit_vector = normal_vector/np.linalg.norm(normal_vector)
+        cos_theta = np.dot(normal_vector, 
+                           target_vector.T)/(np.linalg.norm(target_vector))
+        cos_theta = np.clip(cos_theta, a_min=0., a_max=1.)
+        theta = np.arccos(cos_theta)
+        
+        return normal_unit_vector, theta
         
         
