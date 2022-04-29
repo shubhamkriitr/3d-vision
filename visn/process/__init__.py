@@ -1,7 +1,7 @@
 from visn.solvers.keypoint import OpenCvKeypointMatcher
 import numpy as np
 from typing import List
-from models import BaseGravityEstimator
+from visn.models import BaseGravityEstimator
 
 class BasePreprocessor(object):
     """This preprocessor works on image pairs. For more than 2 images in 
