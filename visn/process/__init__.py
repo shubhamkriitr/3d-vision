@@ -86,23 +86,57 @@ class BasePreprocessor(object):
         return self.gravity_estimator.estimate_gravity
     
     def compute_alignment_rotation(self, source_vector, target_vector):
-        normal_unit_vector, theta = self.compute_alignment(source_vector,
-                                                           target_vector)
+        """`source_vector` and `target_vector` are of shape (1, 3)
+        """
+        normal_unit_vector, theta = self.compute_alignment(
+            source_vector, target_vector)
         
-        # angle of rotation (`theta`) is required to be the magnitude
+        # theta is the magnitude
         R = Rotation.from_rotvec(theta*normal_unit_vector) 
-        
-        return R.as_matrix() # check shape before using
-        # it can be either (3, 3) or (n, 3, 3) based on the input shape
+        print(R.as_rotvec())
+        return R.as_matrix()
     
     def compute_alignment(self, source_vector, target_vector):
         normal_vector = np.cross(source_vector, target_vector)
+        if np.allclose(normal_vector, 0., rtol=1e-8, atol=1e-8):
+            normal_vector = np.zeros_like(source_vector)
+            nonzero_at, = np.where(np.logical_not(np.isclose(
+                                source_vector[0], 0., rtol=1e-8, atol=1e-8)))
+
+            if len(nonzero_at) > 1: # x, y or z axis
+                idx0, idx1 = nonzero_at[0], nonzero_at[1]
+                normal_vector[0][idx0] = source_vector[0][idx1]
+                normal_vector[0][idx1] = -source_vector[0][idx0]
+            elif len(nonzero_at) == 1:
+                normal_vector[0][(nonzero_at[0]+1)%3] = 1.0
+            else: # zero vectors
+                normal_vector[0][1] = 1.0 # choose y-axis
+            
+            
         normal_unit_vector = normal_vector/np.linalg.norm(normal_vector)
-        cos_theta = np.dot(normal_vector, 
-                           target_vector.T)/(np.linalg.norm(target_vector))
-        cos_theta = np.clip(cos_theta, a_min=0., a_max=1.)
+        cos_theta = np.dot(source_vector, target_vector.T)/(
+            np.linalg.norm(source_vector)*np.linalg.norm(target_vector))
+        cos_theta = np.clip(cos_theta, a_min=-1., a_max=1.)
         theta = np.arccos(cos_theta)
         
         return normal_unit_vector, theta
         
-        
+class Preprocessor(BasePreprocessor):
+    def __init__(self, config=None, **kwargs) -> None:
+        super().__init__(config, **kwargs)
+    
+    def process(self, batch_):
+        return super().process(batch_)
+    
+
+if __name__ == "__main__":
+    proc = Preprocessor()
+    
+    s = np.array([[1, 1, 1]])
+    t = np.array([[1, 1, 1]])
+    
+    v, theta = proc.compute_alignment(s, t)
+    
+    print(v, theta)
+    
+
