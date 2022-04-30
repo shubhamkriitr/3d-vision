@@ -103,11 +103,11 @@ class BasePreprocessor(object):
             nonzero_at, = np.where(np.logical_not(np.isclose(
                                 source_vector[0], 0., rtol=1e-8, atol=1e-8)))
 
-            if len(nonzero_at) > 1: # x, y or z axis
+            if len(nonzero_at) > 1: 
                 idx0, idx1 = nonzero_at[0], nonzero_at[1]
                 normal_vector[0][idx0] = source_vector[0][idx1]
                 normal_vector[0][idx1] = -source_vector[0][idx0]
-            elif len(nonzero_at) == 1:
+            elif len(nonzero_at) == 1: # x, y or z axis
                 normal_vector[0][(nonzero_at[0]+1)%3] = 1.0
             else: # zero vectors
                 normal_vector[0][1] = 1.0 # choose y-axis
