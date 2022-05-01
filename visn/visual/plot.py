@@ -22,22 +22,25 @@ class BaseVisualizer:
         return ax
         
         
-    def plot_vectors(self, vectors, origins=None, ranges=None, length=1, ax=None, **kwargs):
+    def plot_vectors(self, vectors, origins=None, ranges=None, length=1,
+                     ax=None, set_axis_ranges=False, mark_axes=False,
+                     **kwargs):
 
         if ax is None:
             ax = self.get_new_subplot()
         
         if origins is None:
             origins = np.zeros_like(vectors)
-        if ranges is None:
+        if ranges is None and set_axis_ranges:
           ranges_1 = self._compute_limits(origins + vectors)
           ranges_2 = self._compute_limits(origins)
           ranges = self._merge_limit_ranges(ranges_1, ranges_2)
-        
-        ax.set_xlim(ranges[0])
-        ax.set_ylim(ranges[1])
-        ax.set_zlim(ranges[2])
-        self.mark_axes_3d(ax)
+        if set_axis_ranges:
+          ax.set_xlim(ranges[0])
+          ax.set_ylim(ranges[1])
+          ax.set_zlim(ranges[2])
+        if mark_axes:
+          self.mark_axes_3d(ax)
         ax.quiver(*origins.T, *vectors.T, length=length, normalize=True,
                   **kwargs)
 
@@ -71,12 +74,15 @@ class BaseVisualizer:
         ax.set_ylabel('${y}$', fontsize=10, rotation = 0)
         ax.set_xlabel('${x}$', fontsize=10, rotation = 0)
 
-    def plot_3d_points(self, points, ax=None):
+    def plot_3d_points(self, points, ax=None, **kwargs):
+      """ kwargs: to be passed to plot function. e.g. 
+      `color='g'`
+      """
       if ax == None:
         fig = plt.figure()
         ax = fig.add_subplot(DEFAULT_SUBPLOT_CODE, projection='3d')
-      ax.plot(xs=points[:,0], ys=points[:,1], zs=points[:,2],
-              color='g', marker='.', linestyle='None')
+      ax.plot(xs=points[:,0], ys=points[:,1], zs=points[:,2], linestyle='None',
+              marker='.', **kwargs)
     
       plt.show(block=False)
 
@@ -84,6 +90,7 @@ class BaseVisualizer:
   
 
     def plot_camera(self, R, c, ax=None, f=1, hx=1, hy=4, scale=1.0, color='b'):
+      """ R : (3, 3), c : (3, 1)"""
       if ax == None:
         fig = plt.figure()
         ax = fig.add_subplot(DEFAULT_SUBPLOT_CODE, projection='3d')
