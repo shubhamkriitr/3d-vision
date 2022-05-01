@@ -51,18 +51,11 @@ class BasePreprocessor(object):
         normalized_keypoints = self.normalized_keypoints(k_inverse,
                                     [keypoints_0, keypoints_1])
             
-            
-            
-            
         if self.pipeline_stage not in sample:
             sample[self.pipeline_stage] = {}
-            
-            
-            
         _stage_data = sample[self.pipeline_stage]
-            
-            
-            # compute gravity if not available already:
+                
+        # compute gravity if not available already:
         gravity_vectors = None
         if "gravity_vectors" not in _stage_data:
             gravity_vectors = self.estimate_gravity(
@@ -76,13 +69,57 @@ class BasePreprocessor(object):
         _stage_data["normalized_keypoints"] = normalized_keypoints
         _stage_data["gravity_vectors"] = gravity_vectors
         
+        
+        # Align vectors # TODO: check pipeline context to see if it needs
+        # to  be computed
+        pipeline_requires_alignment = True
+
+        if pipeline_requires_alignment:
+            target_vectors = np.zeros_like(gravity_vectors)
+            target_vectors[:, 1] = 1. # y-axis
+            alignment_rotations = self.computer_alignmet_rotations(
+                source_vectors=gravity_vectors,
+                target_vectors=target_vectors
+            )
+            _stage_data["R_align"] = alignment_rotations
+            
+            # list of normalized and aligned keyppoints
+            # arrays for each of the images in the group (or pair)
+            _stage_data["normalized_aligned_keypoints"] = \
+                self.rotate_keypoints(alignment_rotations,
+                                      normalized_keypoints)
+            
+        
+        
         return sample # returning as well/ although output is added in place
+    
+    def rotate_keypoints(self,
+                            rotations: List[np.ndarray],
+                            images_keypoints: List[np.ndarray]):
+        """Assuming keypoints.shape (N, 2) (in homogeneous coordinates) # 
+        and `intrinsic_matrix` os shape (3, 3)
+        """
+        output = []
+        for image_idx in range(len(images_keypoints)):
+            keypoints = images_keypoints[image_idx]
+            r = rotations[image_idx]
+            
+            # to homogeneous
+            keypoints = np.concatenate(
+                [keypoints,np.ones(shape=(keypoints.shape[0], 1)
+                                    )], axis=1)
+            result = keypoints@r.T # result of shape (N, 3)
+            
+            result = result / result[:, 2:3] # rescale
+            output.append(result[:, 0:2])  # non-homogenous
+        
+        return output
 
     def normalized_keypoints(self,
                             k_inv_list: List[np.ndarray],
                             images_keypoints: List[np.ndarray]):
-        """Assuming keypoints.shape (N, 2) # 
-        and `intrinsic_matrix` os shape (3, 3)
+        """Assuming images_keypoints.shape (N, 2) # 
+        and `k_inv_list` to be a list of K^-1 with shape (3, 3)
         """
         output = []
         for image_idx in range(len(images_keypoints)):
@@ -102,7 +139,23 @@ class BasePreprocessor(object):
     def estimate_gravity(self):
         return self.gravity_estimator.estimate_gravity
     
-    def compute_alignment_rotation(self, source_vector, target_vector):
+    def computer_alignmet_rotations(self, source_vectors, target_vectors):
+        """
+        `source_vectors` and `target_vectors` are of shape (B, 3). (where 
+        `B` is  the batch size)
+        """
+        B = source_vectors.shape[0]
+        rotations = []
+        for idx in range(B):
+            r = self._compute_alignment_rotation(
+                source_vector=source_vectors[idx:idx+1],
+                target_vector=target_vectors[idx:idx+1]
+            )
+            rotations.append(r)
+        
+        return rotations
+    
+    def _compute_alignment_rotation(self, source_vector, target_vector):
         """`source_vector` and `target_vector` are of shape (1, 3)
         """
         normal_unit_vector, theta = self.compute_alignment(
