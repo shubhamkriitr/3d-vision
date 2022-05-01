@@ -1,4 +1,4 @@
-from visn.solvers.keypoint import OpenCvKeypointMatcher
+from visn.estimation.keypoint import OpenCvKeypointMatcher
 import numpy as np
 from typing import List
 from visn.models import BaseGravityEstimator

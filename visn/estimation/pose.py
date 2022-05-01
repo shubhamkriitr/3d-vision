@@ -5,7 +5,7 @@ print(os.getcwd())
 from visn.data.synthetic import (CameraPairDataGenerator,
     CameraPairDataGeneratorUpright3Pt)
 from visn.examples.fetch_example import get_matched_kps, get_k_matrix
-from visn.solvers.keypoint import OpenCvKeypointMatcher
+from visn.estimation.keypoint import OpenCvKeypointMatcher
 from visn.utils import logger
 import matplotlib.pyplot as plt
 from visn.benchmark.timing import benchmark_runtime
