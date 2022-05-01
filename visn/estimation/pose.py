@@ -8,6 +8,7 @@ from visn.estimation.keypoint import OpenCvKeypointMatcher
 from visn.utils import logger
 import matplotlib.pyplot as plt
 from visn.benchmark.timing import benchmark_runtime
+import copy
 
 default_ransac_options = poselib.RansacOptions()
 default_bundle_options = poselib.BundleOptions()
@@ -24,29 +25,6 @@ DEFAULT_POSELIB_RANSAC_OPTIONS = {
     'max_reproj_error': 12.0, 'max_epipolar_error': 1.0,
     'seed': 0, 'progressive_sampling': False,
     'max_prosac_iterations': 100000}
-
-class PoseLibRansacOptions:
-    def __init__(self, **kwargs) -> None:
-        """Pass values you want to override as kwargs.
-        """
-        pass # TODO
-    
-    @property
-    def options(self):
-        # return attribute as dict TODO:
-        return {}
-    
-class PoseLibBundleOptions:
-    def __init__(self, **kwargs) -> None:
-        """Pass values you want to override as kwargs.
-        Default values are:
-        """
-        pass # TODO
-    
-    @property
-    def options(self):
-        # return attribute as dict TODO:
-        return {}
     
 class PoseEstimator(object):
     
@@ -59,11 +37,21 @@ class PoseEstimator(object):
         return {'model': model, 'width': width,
                 'height': height, 'params': params}
     
-    def prepare_ransac_options(self):
-        pass
+    def prepare_ransac_options(self, **kwargs):
+        ransac_options = copy.deepcopy(DEFAULT_POSELIB_RANSAC_OPTIONS)
+        for k in kwargs:
+            if k in ransac_options:
+                ransac_options[k] = kwargs[k]
+            else:
+                logger.warning(f"Keyword argument {k} is unused/unrecognized.")
     
-    def prepare_bundle_options(self):
-        pass
+    def prepare_bundle_options(self, **kwargs):
+        bundle_options = copy.deepcopy(DEFAULT_POSELIB_BUNDLE_OPTIONS)
+        for k in kwargs:
+            if k in bundle_options:
+                bundle_options[k] = kwargs[k]
+            else:
+                logger.warning(f"Keyword argument {k} is unused/unrecognized.")
     
     
     @property
