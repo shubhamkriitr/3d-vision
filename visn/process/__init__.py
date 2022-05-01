@@ -77,7 +77,7 @@ class BasePreprocessor(object):
         if pipeline_requires_alignment:
             target_vectors = np.zeros_like(gravity_vectors)
             target_vectors[:, 1] = 1. # y-axis
-            alignment_rotations = self.computer_alignmet_rotations(
+            alignment_rotations = self.compute_alignmet_rotations(
                 source_vectors=gravity_vectors,
                 target_vectors=target_vectors
             )
@@ -139,7 +139,7 @@ class BasePreprocessor(object):
     def estimate_gravity(self):
         return self.gravity_estimator.estimate_gravity
     
-    def computer_alignmet_rotations(self, source_vectors, target_vectors):
+    def compute_alignmet_rotations(self, source_vectors, target_vectors):
         """
         `source_vectors` and `target_vectors` are of shape (B, 3). (where 
         `B` is  the batch size)
