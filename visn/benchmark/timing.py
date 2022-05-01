@@ -1,5 +1,5 @@
 from functools import wraps
-from utils import logger
+from visn.utils import logger
 import time
 
 
