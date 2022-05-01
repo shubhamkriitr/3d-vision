@@ -1,7 +1,6 @@
 import poselib
 import os
 import numpy as np
-print(os.getcwd())
 from visn.data.synthetic import (CameraPairDataGenerator,
     CameraPairDataGeneratorUpright3Pt)
 from visn.examples.fetch_example import get_matched_kps, get_k_matrix
@@ -12,6 +11,34 @@ from visn.benchmark.timing import benchmark_runtime
 
 default_ransac_options = poselib.RansacOptions()
 default_bundle_options = poselib.BundleOptions()
+
+class PoseEstimator(object):
+    
+    def __init__(self, config) -> None:
+        self.config = config
+    
+    def prepare_cam(self, model='SIMPLE_PINHOLE', 
+                width=1200, height=800,  params=[4, 0, 0]):
+        # TODO: Adjust based on data
+        return {'model': model, 'width': width,
+                'height': height, 'params': params}
+    
+    def prepare_ransac_options(self):
+        pass
+    
+    def prepare_bundle_options(self):
+        pass
+    
+    
+    @property
+    def estimate_relative_pose_5pt(self):
+        # Use this for benchmarking
+        # TODO: make sure that this wrapping does not affect the comparison
+        return poselib.estimate_relative_pose
+    
+    @property
+    def estimate_relative_pose_3pt_upright(self):
+        return poselib.estimate_relative_pose_3pt_upright
 
 # essential_matrix_5pt
 # relpose_5pt
