@@ -162,10 +162,14 @@ class BasePreprocessor(object):
             source_vector, target_vector)
         
         # theta is the magnitude
-        R = Rotation.from_rotvec(theta*normal_unit_vector) 
-        return R.as_matrix()
+        R = Rotation.from_rotvec(theta*normal_unit_vector)
+        R = R.as_matrix() # it would be of shape (1, 3, 3)
+        
+        return R[0] # shape (3, 3)
     
     def compute_alignment(self, source_vector, target_vector):
+        """`source_vector` and `target_vector` are of shape (1, 3)
+        """
         normal_vector = np.cross(source_vector, target_vector)
         if np.allclose(normal_vector, 0., rtol=1e-8, atol=1e-8):
             normal_vector = np.zeros_like(source_vector)
