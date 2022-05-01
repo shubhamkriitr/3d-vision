@@ -26,6 +26,7 @@ class BasePreprocessor(object):
         self.kpm = OpenCvKeypointMatcher(config={})
         self.gravity_estimator = BaseGravityEstimator()
         self.keypoint_threshold = 0.25
+        self.pipeline_stage = "_stage_preprocess"
             
     def process(self, batch_):
         # Assumes batch_ is a list of dictionaries 
@@ -35,31 +36,47 @@ class BasePreprocessor(object):
         output = []
         
         for sample in batch_:
-            k_inverse = [np.linalg.inv(k) for k in sample["K"]]
-            input_images = sample["input_images"]
-            
-            keypoints_0, keypoints_1 = self.kpm.get_matches(
-                input_images[0], input_images[1], self.keypoint_threshold)
-            
-            normalized_keypoints = self.normalized_keypoints(k_inverse,
-                                    [keypoints_0, keypoints_1])
-            
-            gravity_vectors = self.estimate_gravity(
-                np.concatenate([np.expand_dims(img, axis=0) 
-                                for img in input_images], axis=0)
-            )
-            
-            
-            sample["_stage_preprocess"] = {
-                "K_inverse": k_inverse,
-                "keypoints": [keypoints_0, keypoints_1],
-                "normalized_keypoints": normalized_keypoints ,
-                "gravity_vectors": gravity_vectors
-            }
-            
+            self.process_one_sample(sample)
             output.append(sample)
         
         return output
+
+    def process_one_sample(self, sample):
+        k_inverse = [np.linalg.inv(k) for k in sample["K"]]
+        input_images = sample["input_images"]
+            
+        keypoints_0, keypoints_1 = self.kpm.get_matches(
+                input_images[0], input_images[1], self.keypoint_threshold)
+            
+        normalized_keypoints = self.normalized_keypoints(k_inverse,
+                                    [keypoints_0, keypoints_1])
+            
+            
+            
+            
+        if self.pipeline_stage not in sample:
+            sample[self.pipeline_stage] = {}
+            
+            
+            
+        _stage_data = sample[self.pipeline_stage]
+            
+            
+            # compute gravity if not available already:
+        gravity_vectors = None
+        if "gravity_vectors" not in _stage_data:
+            gravity_vectors = self.estimate_gravity(
+                    np.concatenate([np.expand_dims(img, axis=0) 
+                                    for img in input_images], axis=0)
+                )
+            
+            
+        _stage_data["K_inverse"] = k_inverse
+        _stage_data["keypoints"] = [keypoints_0, keypoints_1]
+        _stage_data["normalized_keypoints"] = normalized_keypoints
+        _stage_data["gravity_vectors"] = gravity_vectors
+        
+        return sample # returning as well/ although output is added in place
 
     def normalized_keypoints(self,
                             k_inv_list: List[np.ndarray],
