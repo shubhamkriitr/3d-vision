@@ -163,7 +163,6 @@ class BasePreprocessor(object):
         
         # theta is the magnitude
         R = Rotation.from_rotvec(theta*normal_unit_vector) 
-        print(R.as_rotvec())
         return R.as_matrix()
     
     def compute_alignment(self, source_vector, target_vector):
