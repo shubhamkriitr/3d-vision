@@ -202,6 +202,22 @@ class Preprocessor(BasePreprocessor):
         return super().process(batch_)
     
 
+class PoseEstimationProcessor(BasePreprocessor):
+    def __init__(self, config=None, **kwargs) -> None:
+        super().__init__(config, **kwargs)
+    
+    def process_one_sample(self, sample):
+        return sample
+
+
+
+class BenchmarkingProcessor(BasePreprocessor):
+    def __init__(self, config=None, **kwargs) -> None:
+        super().__init__(config, **kwargs)
+    
+    def process_one_sample(self, sample):
+        return sample
+    
 if __name__ == "__main__":
     proc = Preprocessor()
     
