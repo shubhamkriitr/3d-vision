@@ -42,7 +42,7 @@ class BasePipeline:
             self.benchmarking_processor.process
         ]
         self.steps_after_end = [
-            self.print_summary
+            self.print_full_summary
         ]
         
         

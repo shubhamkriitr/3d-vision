@@ -3,6 +3,9 @@ import numpy as np
 from typing import List
 from visn.models import BaseGravityEstimator
 from scipy.spatial.transform import Rotation
+from visn.estimation.pose import PoseEstimator
+from visn.utils import logger
+# TODO : move key-names used in sample/stage data to constants 
 
 class BasePreprocessor(object):
     """This preprocessor works on image pairs. For more than 2 images in 
@@ -205,9 +208,119 @@ class Preprocessor(BasePreprocessor):
 class PoseEstimationProcessor(BasePreprocessor):
     def __init__(self, config=None, **kwargs) -> None:
         super().__init__(config, **kwargs)
+        self.pipeline_stage = "_stage_pose_estimate"
+    
+    def _init_from_config(self, config):
+        # TODO use config
+        self.estimator = PoseEstimator()
     
     def process_one_sample(self, sample):
+        
+        sample[self.pipeline_stage] = {}
+        _stage_data = sample[self.pipeline_stage]
+        
+        ransac_3pt_up, ransac_5pt = self.prepare_ransac_options(sample, _stage_data)
+        bundle_3pt_up, bundle_5pt = self.prepare_bundle_options(sample, _stage_data)
+        cam_0, cam_1 = self.prepare_initial_camera_models(sample, _stage_data)
+        
+        _stage_data["ransac_options"] = {"3pt_up": ransac_3pt_up,
+                                         "5pt": ransac_5pt}
+        _stage_data["bundle_options"] = {
+            "3pt_up": bundle_3pt_up,
+            "5pt": bundle_5pt
+        }
+        _stage_data["camera_models"] = [cam_0, cam_1]
+        
+        relative_pose_Rt_3pt_up = \
+            self.process_3point_estimation(sample, _stage_data)
+            
+        relative_pose_Rt_5pt = \
+            self.process_5point_estimation(sample, _stage_data)
+            
+        _stage_data["pose"] = {
+            "3pt_up": relative_pose_Rt_3pt_up,
+            "5pt": relative_pose_Rt_5pt
+        }
+        
+        
         return sample
+    
+    def process_3point_estimation(self, sample, _stage_data):
+        """ 
+        
+        `_stage_data` is the part of the running dict (`sample`) which
+        the current stage is modifying. `sample` is the full running
+        dict (being passed along the steps of the pipeline)
+        """
+        preprocessed_data = sample["_stage_preprocess"]
+        x2d_0 = preprocessed_data["normalized_aligned_keypoints"][0]
+        x2d_1 = preprocessed_data["normalized_aligned_keypoints"][1]
+        cam_0, cam_1 = _stage_data["camera_models"][0:2]
+        
+        possible_poses = self.estimator.estimate_relative_pose_3pt_upright(
+            x2d_0, x2d_1, cam_0, cam_1, 
+            _stage_data["ransac_options"]["3pt_up"],
+            _stage_data["bundle_options"]["3pt_up"]
+        )
+        
+        if len(possible_poses) > 1:
+            logger.warning(f"{len(possible_poses)} possible solutions found"
+                           f". Choosing the first")
+        
+        pose = possible_poses[0]
+            
+        return pose.Rt
+        
+        
+    def process_5point_estimation(self, sample, _stage_data):
+        preprocessed_data = sample["_stage_preprocess"]
+        x2d_0 = preprocessed_data["normalized_keypoints"][0]
+        x2d_1 = preprocessed_data["normalized_keypoints"][1]
+        cam_0, cam_1 = _stage_data["camera_models"][0:2]
+        
+        possible_poses = self.estimator.estimate_relative_pose_5pt(
+            x2d_0, x2d_1, cam_0, cam_1, 
+            _stage_data["ransac_options"]["5pt"],
+            _stage_data["bundle_options"]["5pt"]
+        )
+        
+        if len(possible_poses) > 1:
+            logger.warning(f"{len(possible_poses)} possible solutions found"
+                           f". Choosing the first")
+        
+        pose = possible_poses[0]
+            
+        return pose.Rt
+        
+        
+        
+    def prepare_initial_camera_models(self, sample, _stage_data):
+        # TODO: may use data in sample/_stage_data .. and add
+        # camera model dicts
+        cam_0 = self.estimator.prepare_cam()
+        cam_1 = self.estimator.prepare_cam()
+        return cam_0, cam_1
+    
+    def prepare_ransac_options(self, sample, _stage_data):
+        # TODO: may use data in sample/_stage_data .. and add
+        # ransac parameters information
+        ransac_option_3pt_up = self.estimator.prepare_ransac_options()
+        ransac_option_5pt = self.estimator.prepare_ransac_options()
+        return ransac_option_3pt_up, ransac_option_5pt
+    
+    def prepare_bundle_options(self, sample, _stage_data):
+        # TODO: may use data in sample/_stage_data .. and add
+        # bundle parameters information
+        bundle_option_3pt_up = self.estimator.prepare_bundle_options()
+        bundle_option_5pt = self.estimator.prepare_bundle_options()
+        return bundle_option_3pt_up, bundle_option_5pt
+        
+
+    def to_list_of_nd_array(self, x):
+        x_ = [] # TODO: replace with an optimal version
+        for i in range(x.shape[0]):
+            x_.append(x[i])
+        return x_
 
 
 
