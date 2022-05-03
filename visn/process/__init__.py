@@ -214,6 +214,15 @@ class PoseEstimationProcessor(BasePreprocessor):
 class BenchmarkingProcessor(BasePreprocessor):
     def __init__(self, config=None, **kwargs) -> None:
         super().__init__(config, **kwargs)
+        if "pipeline" in kwargs:
+            self.pipeline = kwargs["pipeline"]
+        
+    def _init_from_config(self, config):
+        if config is None:
+            self.config = {
+            }
+        else:
+            self.config = config
     
     def process_one_sample(self, sample):
         return sample
