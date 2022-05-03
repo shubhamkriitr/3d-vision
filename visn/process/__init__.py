@@ -231,7 +231,7 @@ class PoseEstimationProcessor(BasePreprocessor):
         }
         _stage_data["camera_models"] = [cam_0, cam_1]
         
-        relative_pose_Rt_3pt_up = \
+        relative_pose_Rt_3pt_up, relative_pose_Rt_3pt_up_aligned = \
             self.process_3point_estimation(sample, _stage_data)
             
         relative_pose_Rt_5pt = \
@@ -239,6 +239,7 @@ class PoseEstimationProcessor(BasePreprocessor):
             
         _stage_data["pose"] = {
             "3pt_up": relative_pose_Rt_3pt_up,
+            "3pt_up_aligned": relative_pose_Rt_3pt_up_aligned,
             "5pt": relative_pose_Rt_5pt
         }
         
@@ -271,8 +272,17 @@ class PoseEstimationProcessor(BasePreprocessor):
                            f". Choosing the first")
         
         pose = possible_poses[0]
+        
+        #pose in normalized/aligned coordinate
+        Rt_norm_aligned =  pose.Rt
+        
+        R_align_0 = sample["_stage_preprocess"]["R_align"][0] #for first camera
+        # remove effect of aligning to gravity
+        Rt_norm = R_align_0.T@Rt_norm_aligned
+        
+        
             
-        return pose.Rt
+        return Rt_norm, Rt_norm_aligned
         
         
     def process_5point_estimation(self, sample, _stage_data):
