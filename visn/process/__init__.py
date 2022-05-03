@@ -4,7 +4,9 @@ from typing import List
 from visn.models import BaseGravityEstimator
 from scipy.spatial.transform import Rotation
 from visn.estimation.pose import PoseEstimator
+from visn.benchmark.benchmark import BenchMarker
 from visn.utils import logger
+import poselib
 # TODO : move key-names used in sample/stage data to constants 
 
 class BasePreprocessor(object):
@@ -277,6 +279,7 @@ class PoseEstimationProcessor(BasePreprocessor):
         Rt_norm_aligned =  pose.Rt
         
         R_align_0 = sample["_stage_preprocess"]["R_align"][0] #for first camera
+        # >>> R_align_1 = sample["_stage_preprocess"]["R_align"][1] #for second
         # remove effect of aligning to gravity
         Rt_norm = R_align_0.T@Rt_norm_aligned
         
@@ -352,8 +355,62 @@ class BenchmarkingProcessor(BasePreprocessor):
             }
         else:
             self.config = config
+        self.benchmarker = BenchMarker()
+        self.pipeline_stage = "_stage_benchmark"
     
     def process_one_sample(self, sample):
+        
+        # runtimes in nano seconds
+        args_kwargs_for_3pt_up = [
+            # args
+            (
+            sample["_stage_preprocess"]["normalized_aligned_keypoints"][0],
+            sample["_stage_preprocess"]["normalized_aligned_keypoints"][1],
+            sample["_stage_pose_estimate"]["camera_models"][0],
+            sample["_stage_pose_estimate"]["camera_models"][1],
+            sample["_stage_pose_estimate"]["ransac_options"]["3pt_up"],
+            sample["_stage_pose_estimate"]["bundle_options"]["3pt_up"]
+            ),
+            #kwargs
+            {}
+        ]
+        
+        args_kwargs_for_5pt = [
+            # args
+            (
+            sample["_stage_preprocess"]["normalized_keypoints"][0],
+            sample["_stage_preprocess"]["normalized_keypoints"][1],
+            sample["_stage_pose_estimate"]["camera_models"][0],
+            sample["_stage_pose_estimate"]["camera_models"][1],
+            sample["_stage_pose_estimate"]["ransac_options"]["5pt"],
+            sample["_stage_pose_estimate"]["bundle_options"]["5pt"]
+            ),
+            #kwargs
+            {}
+        ]
+        
+        
+        
+        runtimes_ns = self.benchmarker.compare_runtimes(
+            methods=[poselib.estimate_relative_pose_3pt_upright,
+                     poselib.estimate_relative_pose],
+            args_kwargs=[args_kwargs_for_3pt_up, args_kwargs_for_5pt],
+            use_same_args_kwargs_for_all=False,
+            num_trials=1000,
+            normalization_mode=None
+        )
+        
+        ratio = self.benchmarker.normalize_values(runtimes_ns,
+                                                  mode="first_element")
+        
+        logger.info(f"Runtimes for 3pt_upright, 5pt = {runtimes_ns} , "
+                    f"ratio = {ratio}")
+        
+        sample[self.pipeline_stage] = {
+            "runtimes_ns": runtimes_ns,
+            "runtime_ratio": ratio
+        }
+        
         return sample
     
 if __name__ == "__main__":
