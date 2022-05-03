@@ -211,8 +211,8 @@ class PoseEstimationProcessor(BasePreprocessor):
         self.pipeline_stage = "_stage_pose_estimate"
     
     def _init_from_config(self, config):
-        # TODO use config
-        self.estimator = PoseEstimator()
+        # TODO use config/ set default params
+        self.estimator = PoseEstimator(config=config)
     
     def process_one_sample(self, sample):
         
@@ -255,6 +255,9 @@ class PoseEstimationProcessor(BasePreprocessor):
         preprocessed_data = sample["_stage_preprocess"]
         x2d_0 = preprocessed_data["normalized_aligned_keypoints"][0]
         x2d_1 = preprocessed_data["normalized_aligned_keypoints"][1]
+        
+        x2d_0 = self.to_list_of_nd_array(x2d_0)
+        x2d_1 = self.to_list_of_nd_array(x2d_1)
         cam_0, cam_1 = _stage_data["camera_models"][0:2]
         
         possible_poses = self.estimator.estimate_relative_pose_3pt_upright(
@@ -276,6 +279,9 @@ class PoseEstimationProcessor(BasePreprocessor):
         preprocessed_data = sample["_stage_preprocess"]
         x2d_0 = preprocessed_data["normalized_keypoints"][0]
         x2d_1 = preprocessed_data["normalized_keypoints"][1]
+        x2d_0 = self.to_list_of_nd_array(x2d_0)
+        x2d_1 = self.to_list_of_nd_array(x2d_1)
+        
         cam_0, cam_1 = _stage_data["camera_models"][0:2]
         
         possible_poses = self.estimator.estimate_relative_pose_5pt(

@@ -44,6 +44,7 @@ class PoseEstimator(object):
                 ransac_options[k] = kwargs[k]
             else:
                 logger.warning(f"Keyword argument {k} is unused/unrecognized.")
+        return ransac_options
     
     def prepare_bundle_options(self, **kwargs):
         bundle_options = copy.deepcopy(DEFAULT_POSELIB_BUNDLE_OPTIONS)
@@ -52,6 +53,7 @@ class PoseEstimator(object):
                 bundle_options[k] = kwargs[k]
             else:
                 logger.warning(f"Keyword argument {k} is unused/unrecognized.")
+        return bundle_options
     
     
     @property
