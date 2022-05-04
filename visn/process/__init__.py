@@ -279,9 +279,9 @@ class PoseEstimationProcessor(BasePreprocessor):
         Rt_norm_aligned =  pose.Rt
         
         R_align_0 = sample["_stage_preprocess"]["R_align"][0] #for first camera
-        # >>> R_align_1 = sample["_stage_preprocess"]["R_align"][1] #for second
+        R_align_1 = sample["_stage_preprocess"]["R_align"][1] #for second
         # remove effect of aligning to gravity
-        Rt_norm = R_align_0.T@Rt_norm_aligned
+        Rt_norm = R_align_1.T @ R_align_0.T @ Rt_norm_aligned
         
         
             
