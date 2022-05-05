@@ -1,10 +1,10 @@
-
 from time import sleep
 import numpy as np
 # import pycolmap
 import cv2 as cv
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
+from typing import List
 
 pycolmap = None # FIXME
 # Adapters to use pycolmap/opencv for keypoints
@@ -65,6 +65,64 @@ class OpenCvKeypointMatcher(KeyPointMatcher):
         img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
         return img
 
+
+class KeypointMatchBenchmarker:
+    def __init__(self, relative_pose: List[List[float]], k: List[List[float]]):
+        # FIXME we got one or multiple bugs
+        # TODO Nico
+        # This can be used for the pipeline so far as a pseudo-Benchmarker
+        self.rel_pose_0 = np.array(relative_pose[0])
+        self.rel_pose_1 = np.array(relative_pose[1])
+        self.k = np.array(k)
+        self.k_inv = np.linalg.inv(self.k)
+
+        # compute relative pose from image 0 to image 1
+        self.rel_pose_0_to_1 = self.rel_pose_a_to_b(self.rel_pose_0[:, :3], self.rel_pose_0[:, 3],
+                                                    self.rel_pose_1[:, :3], self.rel_pose_1[:, 3])
+
+        # compute fundamental and essential matrices
+        self.rot_0_to_1 = self.rel_pose_0_to_1[:, :3]
+        self.trans_0_to_1 = self.rel_pose_0_to_1[:, 3]
+        self.trans_0_to_1_cross = np.array([[0, -self.trans_0_to_1[2], self.trans_0_to_1[1]],
+                                            [self.trans_0_to_1[2], 0, self.trans_0_to_1[0]],
+                                            [-self.trans_0_to_1[1], self.trans_0_to_1[0], 0]])
+        self.F = self.rot_0_to_1 @ self.trans_0_to_1_cross
+        self.E = self.k_inv.T @ self.F @ self.k_inv
+        self.E = self.E * np.linalg.norm(self.E)  # normalize with respect to frobenius norm
+
+    @staticmethod
+    def rel_pose_a_to_b(pose_a, trans_a, pose_b, trans_b):
+        trans_a_to_b = pose_a.T @ (trans_b - trans_a).reshape((3, 1))
+        pose_a_to_b = pose_a.T @ pose_b
+        rel_pose = np.concatenate((pose_a_to_b, trans_a_to_b), axis=1)
+        return rel_pose
+
+    def check(self, kpt_0_: List[List[float]], kpt_1_: List[List[float]], epsilon: float):
+        """
+        Gives us a geometric error for each of the keypoints by computing
+        the shortest distance between kpt_1 and the epipolar line in image 1.
+            Input:
+                kpt_0_: list of normalized keypoints of image 0 (matching order of kpt_1_)
+                kpt_1_: list of normalized keypoints of image 1 (matching order of kpt_0_)
+        """
+        kpt_0_, kpt_1_ = np.array(kpt_0_), np.array(kpt_1_)  # convert to numpy array
+        num_kpts = kpt_0_.shape[0]
+        ones = np.ones((num_kpts, 1))
+        kpt_0_, kpt_1_ = np.hstack((kpt_0_, ones)), np.hstack((kpt_1_, ones))
+        r = []
+        for ind, (kpt_0, kpt_1) in enumerate(zip(kpt_0_, kpt_1_)):
+            kpt_0 = kpt_0.reshape((3, 1))
+            kpt_1 = kpt_1.reshape((3, 1))
+            min_distance_to_epipolar_plane = kpt_1.T @ self.E @ kpt_0
+            r.append(abs(min_distance_to_epipolar_plane.item(0)))
+        # TODO normalize (see paper: Fast Iterative Five point Relative Pose Estimation)
+
+        # return outlier or inlier bool vector
+        inliers = np.array(r) < epsilon
+        score = np.sum(inliers) / num_kpts
+        return inliers, score
+
+
 def trial():
     img1 = cv.imread('./visn/examples/images/0006.png') # queryImage
     img2 = cv.imread('./visn/examples/images/0005.png') # trainImage
@@ -95,16 +153,21 @@ if __name__ == "__main__":
     def test_kpm(kpm):
         #path1 = "res_/scene0000_00/rgb/224.png"
         #path2 = "res_/scene0000_00/rgb/256.png"
-        path1 = './visn/examples/images/0006.png' # queryImage
-        path2 = './visn/examples/images/0005.png' # trainImage
+        path1 = '../../visn/examples/images/0006.png' # queryImage
+        path2 = '../../visn/examples/images/0005.png' # trainImage
+        k_path = '../../visn/examples/images/K.txt' # K matrix
 
         img1 = kpm.load_image(path1)
         img2 = kpm.load_image(path2)
+        with open(k_path, "r") as f:
+            content = f.read()
+            k = [[float(y) for y in x.split(" ")] for x in content.split("\n") if x]
 
         keypoints_1, keypoints_2 = kpm.get_matches(img1,img2, 0.25)
+        print(keypoints_1)
 
         H, _ = cv.findHomography(keypoints_1, keypoints_2, cv.RANSAC,5.0)
-        img1_warp = kpm.warp_image(img1, H)
+        img1_warp = kpm.warp_image(img1, H, k)
         result = np.concatenate((img1_warp,img2), axis=1)
         
         plt.imshow(result, 'gray')
