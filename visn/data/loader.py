@@ -165,9 +165,8 @@ class BaseDataset:
             rel_pose = [float(x) for x in content.split(" ")]
         return rel_pose
 
-    def __getitem__(self, index):
+    def __getitem__(self, id_: str):
         # load and return image, relative_pose, roll_pitch_gt and roll_pitch_pred
-        id_ = self.get_id(index)
         out = {"img": self.get_image(id_, self.data_root_dir, self.image_extension),
                "rel_pose": self.get_relative_pose(id_, self.data_root_dir),
                "rp_gt": self.get_roll_pitch(id_, gth=True),
@@ -178,7 +177,7 @@ class BaseDataset:
         return len(self.ids)
 
 
-class GroupedImagesDataset:
+class GroupedImagesDataset(BaseDataset):
     """Image pair data set. Loads individual images and K matrices as array
     from specified data rootdir, applies
     random transformations to create synthetic pairs to be used later in the
@@ -187,84 +186,33 @@ class GroupedImagesDataset:
     matrix is `K_<id>.txt` (otherwise `K.txt` will be used).
     Image grouping is read from `GROUPS.txt`
     """
-    def __init__(self, config = None, **kwargs) -> None:
-        self.image_ids = None
-        self.image_extension = None
-        self.metadata = "" # to be used later/ for specifying modalities and
-        # versions etc.
-        self._init_from_config(config)
-        self._inspect_data_rootdir()
-    
-    def _init_from_config(self, config):
-        if config is None:
-            self.config = {
-                "data_rootdir": Path(RESOURCE_ROOT)/"1"/"images",
-                "image_extension": constants.IMG_EXT_PNG
-            }
-        else:
-            self.config = config
 
-        self.data_rootdir = self.config["data_rootdir"]
-        self.image_extension = self.config["image_extension"]
-        
-    def _inspect_data_rootdir(self):
-        files = os.listdir(self.data_rootdir)
-        self.image_ids = [name.split(".")[0] for name in files 
-                       if name.endswith(self.image_extension)]
-        groups_file_path = str(self.data_rootdir/"GROUPS.txt")
-        self.image_groups = self._read_image_groups(groups_file_path)
-        
-        logger.debug(f"Files: {files}")
-        
-    def _read_image_groups(self, file_path):
-        """File content is assumed to be similar to the example below:
-        0000 0001
-        0000 0002
-        0002 0003
-        0004 0005
-        """
-        lines = []
-        with open(file_path, "r") as f:
-            lines = f.readlines()
-        
-        groups = []
-        for l in lines:
-            l = l.strip().split()
-            current_group = [id_.strip() for id_ in l]
-            groups.append(current_group)
-        
-        return groups
-        
+    def __init__(self, data_root_dir: str = DATA_ROOT, image_extension: str = IMG_EXT_PNG, **kwargs) -> None:
+        super().__init__(data_root_dir, image_extension)
+        self.metadata = ""  # to be used later/ for specifying modalities and versions etc.
+
     def __len__(self) -> int:
-        return len(self.image_groups)
+        return len(self.groups)
 
     def __getitem__(self, index: int):
-        group = self.image_groups[index]
-        input_images = []
-        intrinsic_matrices = []
+        # get relevant data for group
+        group = self.groups[index]
+        img_, rel_pos_, rp_gt_, rp_pred_ = [], [], [], []
         for id_ in group:
-            img, k = self.load_data_by_id(id_)
-            input_images.append(img)
-            intrinsic_matrices.append(k)
-        return {"input_images": input_images, "K": intrinsic_matrices}
+            img, rel_pose, rp_gt, rp_pred = super().__getitem__(id_).values()
+            img_.append(img)
+            rel_pos_.append(rel_pose)
+            rp_gt_.append(rp_gt)
+            rp_pred_.append(rp_pred)
 
+        # structure output
+        out = {"input_images": img_,
+               "input_relatives_poses": rel_pos_,
+               "input_roll_pitch_gt": rp_gt_,
+               "input_roll_pitch_pred": rp_pred_,
+               "input_k": self.calibration["k"]}
+        return out
 
-    def load_data_by_id(self, id_):
-        image_path = str(self.data_rootdir/f"{id_}{self.image_extension}")
-        k_path = str(self.data_rootdir/f"K_{id}.txt")
-        if not os.path.isfile(k_path):
-            k_path = self.data_rootdir/f"K.txt"
-        k_intrinsic = self.load_intrinsic_matrix(k_path)
-        img = cv.imread(image_path)
-        # return image as is (i.e. color)
-        # >>> img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-        return img, k_intrinsic
-    
-    def load_intrinsic_matrix(self, file_path):
-        return np.loadtxt(file_path)
-
-        
-        
         
 class SequentialDataLoader(object): # TODO: may use torch's loader instead
     def __init__(self, dataset, batch_size) -> None:
