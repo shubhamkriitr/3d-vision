@@ -280,8 +280,12 @@ class PoseEstimationProcessor(BasePreprocessor):
         
         R_align_0 = sample["_stage_preprocess"]["R_align"][0] #for first camera
         R_align_1 = sample["_stage_preprocess"]["R_align"][1] #for second
+        R_na = Rt_norm_aligned[:, 0:3]
+        t_na = Rt_norm_aligned[:, 3:4]
+        R_norm = R_align_1.T @ R_na @ R_align_0
+        t_norm = R_align_1.T @ t_na 
         # remove effect of aligning to gravity
-        Rt_norm = R_align_1.T @ R_align_0.T @ Rt_norm_aligned
+        Rt_norm = np.concatenate([R_norm, t_norm], axis=1)
         
         
             
