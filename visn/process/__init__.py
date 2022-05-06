@@ -21,12 +21,21 @@ class BasePreprocessor(object):
 
     def _init_from_config(self, config):
         self.config = {**read_config()["preprocessor"], **config}
-        assert self.config["keypoint_matcher"] == "OpenCvKeypointMatcher"
 
-        self.kpm = OpenCvKeypointMatcher(config={})
-        self.gravity_estimator = BaseGravityEstimator()
-        self.keypoint_threshold = 0.25
-        self.pipeline_stage = "_stage_preprocess"
+        # keypoint matcher
+        if self.config["keypoint_matcher"] == "OpenCvKeypointMatcher":
+            self.kpm = OpenCvKeypointMatcher(config={})
+        else:
+            raise ValueError
+
+        # gravity estimator
+        if self.config["gravity_estimator"] == "BaseGravityEstimator":
+            self.gravity_estimator = BaseGravityEstimator()
+        else:
+            raise ValueError
+
+        self.keypoint_threshold = self.config["keypoint_threshold"]
+        self.pipeline_stage = self.config["pipeline_stage"]
             
     def process(self, batch_):
         # Assumes batch_ is a list of dictionaries 
