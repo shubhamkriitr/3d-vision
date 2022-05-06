@@ -1,6 +1,7 @@
 {
   "dataset": {
     "object": "GroupedImagesDataset",
+    "resource_scene": "easy_scenes/scene0025_01",
     "use_prediction": true
   },
   "dataloader": {
@@ -8,7 +9,9 @@
     "batch_size": 1
   },
   "preprocessor": {
-    "object": "BasePreprocessor"
+    "object": "BasePreprocessor",
+    "keypoint_matcher": "OpenCvKeypointMatcher",
+    "gravity_estimator": "BaseGravityEstimator"
   },
   "pose_estimator": {
     "object": "PoseEstimationProcessor"

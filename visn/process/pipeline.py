@@ -16,10 +16,10 @@ class BasePipeline:
         self.config = {**read_config(), **config}
 
         # TODO get objects from factory
-        self.dataset = GroupedImagesDataset(use_prediction=self.config["dataset"]["use_prediction"])
+        self.dataset = GroupedImagesDataset(config=self.config["dataset"])
         self.dataloader = SequentialDataLoader(dataset=self.dataset,
-                                               batch_size=self.config["dataloader"]["batch_size"])
-        self.preprocessor = BasePreprocessor()
+                                               config=self.config["dataloader"])
+        self.preprocessor = BasePreprocessor(self.config["preprocessor"])
         self.pose_estimation_processor = PoseEstimationProcessor()
         self.benchmarking_processor = BenchmarkingProcessor(pipeline=self)
     

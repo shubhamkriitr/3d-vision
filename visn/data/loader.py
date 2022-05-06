@@ -9,6 +9,7 @@ import cv2 as cv
 import numpy as np
 from typing import Dict, List
 from collections import defaultdict
+from visn.config import read_config
 # TODO: Also see: https://pytorch.org/docs/stable/data.html
 
 class BaseDataLoader(object):
@@ -78,15 +79,20 @@ class BaseDataset:
             |    |---0001.txt
             |    |---...
     """
-    def __init__(self, data_root_dir: str = DATA_ROOT, image_extension: str = IMG_EXT_PNG, **kwargs) -> None:
-        self.data_root_dir = data_root_dir
+    def __init__(self, image_extension: str = IMG_EXT_PNG, config: Dict = {}, **kwargs) -> None:
         self.image_extension = image_extension
+        self._init_from_config(config)
 
         # load relevant data
         self.ids = self.get_ids(self.data_root_dir, self.image_extension)
         self.id_digits = len(self.ids[0])
         self.calibration = self.get_calibration(self.data_root_dir)
         self.groups = self.get_groups(self.data_root_dir)
+
+    def _init_from_config(self, config):
+        self.config = {**read_config()["dataset"], **config}
+        self.data_root_dir = os.path.join(RESOURCE_ROOT, self.config["resource_scene"])
+        self.use_prediction = self.config["use_prediction"]
 
     def get_calibration(self, data_root_dir: str = DATA_ROOT) -> Dict[str, List]:
         # define required paths
@@ -201,10 +207,8 @@ class GroupedImagesDataset(BaseDataset):
     Image grouping is read from `GROUPS.txt`
     """
 
-    def __init__(self, data_root_dir: str = DATA_ROOT, image_extension: str = IMG_EXT_PNG, use_prediction: bool = True,
-                 **kwargs) -> None:
-        super().__init__(data_root_dir, image_extension)
-        self.use_prediction = use_prediction
+    def __init__(self, image_extension: str = IMG_EXT_PNG, config: Dict = {}, **kwargs) -> None:
+        super().__init__(image_extension, config)
         self.metadata = ""  # to be used later/ for specifying modalities and versions etc.
 
     def __len__(self) -> int:
@@ -239,12 +243,15 @@ class GroupedImagesDataset(BaseDataset):
 
         
 class SequentialDataLoader(object): # TODO: may use torch's loader instead
-    def __init__(self, dataset, batch_size) -> None:
+    def __init__(self, dataset, config: Dict = {}) -> None:
         self.dataset = dataset
-        self.batch_size = batch_size
+        self._init_from_config(config)
         self._num_samples_yieled = 0
-        
-        
+
+    def _init_from_config(self, config):
+        self.config = {**read_config()["dataloader"], **config}
+        self.batch_size = self.config["batch_size"]
+
     def __iter__(self):
         return self
     
