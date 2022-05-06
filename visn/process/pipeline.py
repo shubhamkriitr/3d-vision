@@ -7,34 +7,21 @@ from typing import Dict
 
 
 class BasePipeline:
-    def __init__(self, config: Dict = read_config(), **kwargs) -> None:
+    def __init__(self, config: Dict = {}, **kwargs) -> None:
         self._init_from_config(config)
-        
         self.setup_pipeline_steps()
-        
-    
+
     def _init_from_config(self, config):
-        if config is None:
-            self.config = {
-               "input_loader": {
-                   "dataset": "GroupedImagesDataset",
-                   "loader": "SequentialDataLoader"
-               },
-               "preprocessor": "BasePreprocessor",
-               "benchmarker": None,
-               "use_prediction": True
-            }
-        else:
-            self.config = config
+        # update config with default configuration
+        self.config = {**read_config(), **config}
+
         # TODO get objects from factory
-        self.dataset = GroupedImagesDataset(use_prediction=self.config["use_prediction"])
+        self.dataset = GroupedImagesDataset(use_prediction=self.config["dataset"]["use_prediction"])
         self.dataloader = SequentialDataLoader(dataset=self.dataset,
-                                               batch_size=1)
+                                               batch_size=self.config["dataloader"]["batch_size"])
         self.preprocessor = BasePreprocessor()
         self.pose_estimation_processor = PoseEstimationProcessor()
         self.benchmarking_processor = BenchmarkingProcessor(pipeline=self)
-        
-        
     
     def setup_pipeline_steps(self):
         # TODO: use these steps

@@ -1,0 +1,19 @@
+{
+  "dataset": {
+    "object": "GroupedImagesDataset",
+    "use_prediction": true
+  },
+  "dataloader": {
+    "object": "SequentialDataLoader",
+    "batch_size": 1
+  },
+  "preprocessor": {
+    "object": "BasePreprocessor"
+  },
+  "pose_estimator": {
+    "object": "PoseEstimationProcessor"
+  },
+  "benchmarker": {
+    "object": "BenchmarkingProcessor"
+  }
+}
