@@ -83,13 +83,12 @@ class BaseDataset:
         self.image_extension = image_extension
 
         # load relevant data
-        self.calibration = self.get_calibration(self.data_root_dir)
-        self.groups = self.get_groups(self.data_root_dir)
         self.ids = self.get_ids(self.data_root_dir, self.image_extension)
         self.id_digits = len(self.ids[0])
+        self.calibration = self.get_calibration(self.data_root_dir)
+        self.groups = self.get_groups(self.data_root_dir)
 
-    @staticmethod
-    def get_calibration(data_root_dir: str = DATA_ROOT) -> Dict[str, List]:
+    def get_calibration(self, data_root_dir: str = DATA_ROOT) -> Dict[str, List]:
         # define required paths
         calibration_dir_path = os.path.join(data_root_dir, "calibration")
         image_size_file_path = os.path.join(calibration_dir_path, "image_size.txt")
@@ -105,7 +104,7 @@ class BaseDataset:
             content = f.read()
             k = [[float(y) for y in x.split(" ")] for x in content.split("\n") if x]
 
-        return {"image_size": image_size, "k": k}
+        return {"image_size": image_size, "K": k}
 
     @staticmethod
     def get_groups(data_root_dir: str = DATA_ROOT) -> List[List[str]]:
@@ -165,12 +164,27 @@ class BaseDataset:
             rel_pose = [float(x) for x in content.split(" ")]
         return rel_pose
 
+    @staticmethod
+    def get_gravity(id_: str, gth: bool = True, data_root_dir: str = DATA_ROOT) -> List[float]:
+        # gth: True => get gravity_gt
+        # gth: False => get gravity_pred
+        if gth:
+            gravity_file_path = os.path.join(data_root_dir, "gravity_gt", f"{id_}.txt")
+        else:
+            gravity_file_path = os.path.join(data_root_dir, "gravity_pred", f"{id_}.txt")
+        with open(gravity_file_path, "r") as f:
+            content = f.read()
+            rel_pose = [float(x) for x in content.split(" ")]
+        return rel_pose
+
     def __getitem__(self, id_: str):
         # load and return image, relative_pose, roll_pitch_gt and roll_pitch_pred
         out = {"img": self.get_image(id_, self.data_root_dir, self.image_extension),
                "rel_pose": self.get_relative_pose(id_, self.data_root_dir),
                "rp_gt": self.get_roll_pitch(id_, gth=True),
-               "rp_pred": self.get_roll_pitch(id_, gth=False)}
+               "rp_pred": self.get_roll_pitch(id_, gth=False),
+               "gr_gt": self.get_gravity(id_, gth=True),
+               "gr_pred": self.get_gravity(id_, gth=False)}
         return out
     
     def __len__(self):
@@ -197,20 +211,25 @@ class GroupedImagesDataset(BaseDataset):
     def __getitem__(self, index: int):
         # get relevant data for group
         group = self.groups[index]
-        img_, rel_pos_, rp_gt_, rp_pred_ = [], [], [], []
+        img_, rel_pos_, rp_gt_, rp_pred_, gr_gt_, gr_pred_, k_ = [], [], [], [], [], [], []
         for id_ in group:
-            img, rel_pose, rp_gt, rp_pred = super().__getitem__(id_).values()
+            img, rel_pose, rp_gt, rp_pred, gr_gt, gr_pred = super().__getitem__(id_).values()
             img_.append(img)
             rel_pos_.append(rel_pose)
             rp_gt_.append(rp_gt)
             rp_pred_.append(rp_pred)
+            gr_gt_.append(gr_gt)
+            gr_pred_.append(gr_pred)
+            k_.append(self.calibration["K"])
 
         # structure output
         out = {"input_images": img_,
                "input_relatives_poses": rel_pos_,
                "input_roll_pitch_gt": rp_gt_,
                "input_roll_pitch_pred": rp_pred_,
-               "input_k": self.calibration["k"]}
+               "input_gravity_gt": gr_gt_,
+               "input_gravity_pred": gr_pred_,
+               "K": k_}
         return out
 
         

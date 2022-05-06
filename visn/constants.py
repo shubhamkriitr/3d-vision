@@ -7,7 +7,7 @@ from datetime import datetime
 MAIN_MODULE_ROOT = Path(__file__).parent
 PROJECTPATH = MAIN_MODULE_ROOT.parent
 RESOURCE_ROOT = Path(PROJECTPATH)/"resources"
-DATA_ROOT = Path(RESOURCE_ROOT)/"scene0011_00"
+DATA_ROOT = Path(RESOURCE_ROOT)/"easy_scenes"/"scene0025_01"
 OUTPUT_ROOT = Path(PROJECTPATH)/"outputs"
 TEMP_ROOT = Path(PROJECTPATH)/"__temp"
 
