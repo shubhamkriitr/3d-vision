@@ -1,6 +1,7 @@
 {
   "dataset": {
     "object": "GroupedImagesDataset",
+    "resource_scene": "easy_scenes/scene0025_01",
     "use_prediction": true
   },
   "dataloader": {
@@ -8,12 +9,18 @@
     "batch_size": 1
   },
   "preprocessor": {
-    "object": "BasePreprocessor"
+    "object": "BasePreprocessor",
+    "pipeline_stage": "_stage_preprocess",
+    "keypoint_matcher": "OpenCvKeypointMatcher",
+    "gravity_estimator": "BaseGravityEstimator",
+    "keypoint_threshold": 0.25
   },
   "pose_estimator": {
-    "object": "PoseEstimationProcessor"
+    "object": "PoseEstimationProcessor",
+    "pipeline_stage": "_stage_pose_estimate"
   },
   "benchmarker": {
-    "object": "BenchmarkingProcessor"
+    "object": "BenchmarkingProcessor",
+    "pipeline_stage": "_stage_benchmark"
   }
 }

@@ -7,31 +7,35 @@ from visn.estimation.pose import PoseEstimator
 from visn.benchmark.benchmark import BenchMarker
 from visn.utils import logger
 import poselib
+from typing import Dict
+from visn.config import read_config
 # TODO : move key-names used in sample/stage data to constants 
 
 class BasePreprocessor(object):
     """This preprocessor works on image pairs. For more than 2 images in 
     a sample, only the first two will be used.
     """
-    def __init__(self, config = None, **kwargs) -> None:
+    def __init__(self, config: Dict = {}, **kwargs) -> None:
         self._init_from_config(config)
         self.pipeline = None # to be used later (for shared context etc.)
-        
-    
+
     def _init_from_config(self, config):
-        if config is None:
-            self.config = {
-                "keypoint_matcher": "OpenCvKeypointMatcher", # use factory: TODO,
-                "gravity_estimator": "BaseGravityEstimator"
-            }
+        self.config = {**read_config()["preprocessor"], **config}
+
+        # keypoint matcher
+        if self.config["keypoint_matcher"] == "OpenCvKeypointMatcher":
+            self.kpm = OpenCvKeypointMatcher(config={})
         else:
-            self.config = config
-            
-        assert self.config["keypoint_matcher"] == "OpenCvKeypointMatcher"
-        self.kpm = OpenCvKeypointMatcher(config={})
-        self.gravity_estimator = BaseGravityEstimator()
-        self.keypoint_threshold = 0.25
-        self.pipeline_stage = "_stage_preprocess"
+            raise ValueError
+
+        # gravity estimator
+        if self.config["gravity_estimator"] == "BaseGravityEstimator":
+            self.gravity_estimator = BaseGravityEstimator()
+        else:
+            raise ValueError
+
+        self.keypoint_threshold = self.config["keypoint_threshold"]
+        self.pipeline_stage = self.config["pipeline_stage"]
             
     def process(self, batch_):
         # Assumes batch_ is a list of dictionaries 
@@ -199,9 +203,10 @@ class BasePreprocessor(object):
         theta = np.arccos(cos_theta)
         
         return normal_unit_vector, theta
-        
+
+
 class Preprocessor(BasePreprocessor):
-    def __init__(self, config=None, **kwargs) -> None:
+    def __init__(self, config: Dict = {}, **kwargs) -> None:
         super().__init__(config, **kwargs)
     
     def process(self, batch_):
@@ -209,7 +214,7 @@ class Preprocessor(BasePreprocessor):
     
 
 class PoseEstimationProcessor(BasePreprocessor):
-    def __init__(self, config=None, **kwargs) -> None:
+    def __init__(self, config: Dict = {}, **kwargs) -> None:
         super().__init__(config, **kwargs)
         self.pipeline_stage = "_stage_pose_estimate"
     
