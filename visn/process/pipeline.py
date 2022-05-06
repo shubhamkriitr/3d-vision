@@ -2,8 +2,12 @@ from visn.process import (BasePreprocessor, PoseEstimationProcessor,
                           BenchmarkingProcessor)
 from visn.data.loader import SequentialDataLoader, GroupedImagesDataset
 from visn.utils import logger
+from visn.config import read_config
+from typing import Dict
+
+
 class BasePipeline:
-    def __init__(self, config = None, **kwargs) -> None:
+    def __init__(self, config: Dict = read_config(), **kwargs) -> None:
         self._init_from_config(config)
         
         self.setup_pipeline_steps()
@@ -17,12 +21,13 @@ class BasePipeline:
                    "loader": "SequentialDataLoader"
                },
                "preprocessor": "BasePreprocessor",
-               "benchmarker": None
+               "benchmarker": None,
+               "use_prediction": True
             }
         else:
             self.config = config
         # TODO get objects from factory
-        self.dataset = GroupedImagesDataset()
+        self.dataset = GroupedImagesDataset(use_prediction=self.config["use_prediction"])
         self.dataloader = SequentialDataLoader(dataset=self.dataset,
                                                batch_size=1)
         self.preprocessor = BasePreprocessor()

@@ -62,12 +62,13 @@ class BasePreprocessor(object):
                 
         # compute gravity if not available already:
         gravity_vectors = None
-        if "gravity_vectors" not in _stage_data:
+        if "input_gravity" not in sample:
             gravity_vectors = self.estimate_gravity(
                     np.concatenate([np.expand_dims(img, axis=0) 
                                     for img in input_images], axis=0)
                 )
-            
+        else:
+            gravity_vectors = np.array(sample["input_gravity"])
             
         _stage_data["K_inverse"] = k_inverse
         _stage_data["keypoints"] = [keypoints_0, keypoints_1]

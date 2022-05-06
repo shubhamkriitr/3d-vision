@@ -201,8 +201,10 @@ class GroupedImagesDataset(BaseDataset):
     Image grouping is read from `GROUPS.txt`
     """
 
-    def __init__(self, data_root_dir: str = DATA_ROOT, image_extension: str = IMG_EXT_PNG, **kwargs) -> None:
+    def __init__(self, data_root_dir: str = DATA_ROOT, image_extension: str = IMG_EXT_PNG, use_prediction: bool = True,
+                 **kwargs) -> None:
         super().__init__(data_root_dir, image_extension)
+        self.use_prediction = use_prediction
         self.metadata = ""  # to be used later/ for specifying modalities and versions etc.
 
     def __len__(self) -> int:
@@ -211,7 +213,8 @@ class GroupedImagesDataset(BaseDataset):
     def __getitem__(self, index: int):
         # get relevant data for group
         group = self.groups[index]
-        img_, rel_pos_, rp_gt_, rp_pred_, gr_gt_, gr_pred_, k_ = [], [], [], [], [], [], []
+        img_, rel_pos_, rp_gt_, rp_pred_ = [], [], [], []
+        gr_gt_, gr_pred_, gr_, k_ = [], [], [], []
         for id_ in group:
             img, rel_pose, rp_gt, rp_pred, gr_gt, gr_pred = super().__getitem__(id_).values()
             img_.append(img)
@@ -221,6 +224,7 @@ class GroupedImagesDataset(BaseDataset):
             gr_gt_.append(gr_gt)
             gr_pred_.append(gr_pred)
             k_.append(self.calibration["K"])
+        gr_ = gr_pred_ if self.use_prediction else gr_gt_
 
         # structure output
         out = {"input_images": img_,
@@ -229,6 +233,7 @@ class GroupedImagesDataset(BaseDataset):
                "input_roll_pitch_pred": rp_pred_,
                "input_gravity_gt": gr_gt_,
                "input_gravity_pred": gr_pred_,
+               "input_gravity": gr_,
                "K": k_}
         return out
 
