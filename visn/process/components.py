@@ -5,6 +5,7 @@ from visn.models import BaseGravityEstimator
 from scipy.spatial.transform import Rotation
 from visn.estimation.pose import PoseEstimator
 from visn.benchmark.benchmark import BenchMarker
+from visn.benchmark.metrics import compute_pose_error
 from visn.utils import logger
 import poselib
 from typing import Dict
@@ -449,6 +450,72 @@ class BenchmarkingProcessor(BasePreprocessor):
         }
         
         return sample
+    
+    def log_pose_errors(self, sample, _stage_data: dict):
+        """ 
+        Computes pose error between groundtruth pose and the estimated poses.
+        Stores he estimated error in the `_stage_data` provided.
+        """
+        estimated = sample["_stage_pose_estimate"]
+        preprocessed = sample["_stage_preprocess"]
+        
+        #check ground truth pose in input
+        Rt_gt = self.extract_value(estimated,
+                [["input_relatives_pose_gt"],
+                 ["_stage_input", "relatives_pose_gt"],
+                ], default_value=None)
+        if Rt_gt is None:
+            logger.warning(f"Could not find `relative_pose_gt` in inputs,"
+                         f"Will check preprocessing stage outputs now.")
+        
+            Rt_gt = self.extract_value(preprocessed, [["relative_pose_gt"]],
+                                       default_value=None)
+            
+        if Rt_gt is None:
+            logger.error(f"Ground truth relative pose is not available. "
+                         f"Skipping pose error computation.")
+            return
+        
+        Rt_3pt_up = estimated["pose"]["3pt_up"]
+        Rt_5pt = estimated["pose"]["5pt"]
+        
+        rotation_err_3pt_up, t_error_3pt_up = \
+            compute_pose_error(Rt_3pt_up, Rt_gt, degrees=True)
+        
+        rotation_err_5pt, t_error_5pt = \
+            compute_pose_error(Rt_5pt, Rt_gt, degrees=True)
+        
+        _stage_data["pose_error_rotation"] = {
+            "3pt_up": rotation_err_3pt_up,
+            "5pt": rotation_err_5pt
+        }
+        
+        _stage_data["pose_error_translation"] = {
+            "3pt_up": t_error_3pt_up,
+            "5pt": t_error_5pt
+        }
+    
+    @property 
+    def _schema(self):
+        return {
+            self.pipeline_stage  : {
+                "runtimes_ns": None,
+                "runtime_ratio": None,
+                "pose_error_rotation" : {
+                    "3pt_up": None,
+                    "5pt": None
+                },
+                "pose_error_translation" : {
+                    "3pt_up": None,
+                    "5pt": None
+                }
+                
+            }
+        }
+        
+        
+        
+        
     
 if __name__ == "__main__":
     proc = Preprocessor()

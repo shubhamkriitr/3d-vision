@@ -1,4 +1,4 @@
-from visn.process import (BasePreprocessor, PoseEstimationProcessor,
+from visn.process.components import (BasePreprocessor, PoseEstimationProcessor,
                           BenchmarkingProcessor)
 from visn.data.loader import SequentialDataLoader, GroupedImagesDataset
 from visn.utils import logger
