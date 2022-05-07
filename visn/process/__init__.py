@@ -219,19 +219,16 @@ class BasePreprocessor(object):
             will be returned
         """
         value = None
-        error_count = 0
         for key_seq in key_sequences:
             try:
                 value = container
                 for k in key_seq:
                     value = value[k]
+                return value
             except KeyError:
-                error_count += 1
+                pass
         
-        if error_count == len(key_sequences):
-            return default_value
-        
-        return value
+        return default_value
 
 
 class Preprocessor(BasePreprocessor):
