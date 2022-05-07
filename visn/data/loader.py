@@ -232,7 +232,7 @@ class GroupedImagesDataset(BaseDataset):
 
         # structure output
         out = {"input_images": img_,
-               "input_relatives_poses": rel_pos_,
+               "input_relative_poses": rel_pos_,
                "input_roll_pitch_gt": rp_gt_,
                "input_roll_pitch_pred": rp_pred_,
                "input_gravity_gt": gr_gt_,

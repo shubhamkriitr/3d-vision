@@ -442,8 +442,8 @@ class BenchmarkingProcessor(BasePreprocessor):
         
         #check ground truth pose in input
         Rt_gt = self.extract_value(estimated,
-                [["input_relatives_pose_gt"],
-                 ["_stage_input", "relatives_pose_gt"],
+                [["input_relative_pose_gt"],
+                 ["_stage_input", "relative_pose_gt"],
                 ], default_value=None)
         if Rt_gt is None:
             logger.warning(f"Could not find `relative_pose_gt` in inputs,"

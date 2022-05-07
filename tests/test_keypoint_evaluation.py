@@ -14,7 +14,7 @@ img_2 = data_batch["input_images"][1]
 keypoints_1, keypoints_2 = kpm.get_matches(img_1, img_2, ratio=1)
 
 # use benchmarker for checking % of good matches (score)
-kpt_benchmarker = KeypointMatchBenchmarker(data_batch["input_relatives_poses"], data_batch["input_k"])
+kpt_benchmarker = KeypointMatchBenchmarker(data_batch["input_relative_poses"], data_batch["input_k"])
 inliers, score = kpt_benchmarker.check(keypoints_1, keypoints_2, epsilon=0.02)
 print(f"inlier / outlier Ratio: {score}")
 
