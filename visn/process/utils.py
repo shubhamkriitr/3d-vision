@@ -27,3 +27,15 @@ def compute_alignment(source_vector, target_vector):
     theta = np.arccos(cos_theta)
     
     return normal_unit_vector, theta
+
+def compute_alignment_rotation(source_vector, target_vector):
+    """`source_vector` and `target_vector` are of shape (1, 3)
+    """
+    normal_unit_vector, theta = compute_alignment(
+        source_vector, target_vector)
+    
+    # theta is the magnitude
+    R = Rotation.from_rotvec(theta*normal_unit_vector)
+    R = R.as_matrix() # it would be of shape (1, 3, 3)
+    
+    return R[0] # shape (3, 3)
