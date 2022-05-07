@@ -449,6 +449,8 @@ class BenchmarkingProcessor(BasePreprocessor):
             "runtime_ratio": ratio
         }
         
+        self.log_pose_errors(sample, sample[self.pipeline_stage])
+        
         return sample
     
     def log_pose_errors(self, sample, _stage_data: dict):
