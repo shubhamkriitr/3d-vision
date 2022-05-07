@@ -292,17 +292,17 @@ class PoseEstimationProcessor(BasePreprocessor):
         x2d_1 = self.to_list_of_nd_array(x2d_1)
         cam_0, cam_1 = _stage_data["camera_models"][0:2]
         
-        possible_poses = self.estimator.estimate_relative_pose_3pt_upright(
+        solution = self.estimator.estimate_relative_pose_3pt_upright(
             x2d_0, x2d_1, cam_0, cam_1, 
             _stage_data["ransac_options"]["3pt_up"],
             _stage_data["bundle_options"]["3pt_up"]
         )
         
-        if len(possible_poses) > 1:
-            logger.warning(f"{len(possible_poses)} possible solutions found"
-                           f". Choosing the first")
         
-        pose = possible_poses[0]
+        
+        pose, solution_metadata = solution
+        logger.info(f"Solution metadata: "
+                    f"{self.prune_solution_metadata(solution_metadata)}")
         
         #pose in normalized/aligned coordinate
         Rt_norm_aligned =  pose.Rt
@@ -330,17 +330,17 @@ class PoseEstimationProcessor(BasePreprocessor):
         
         cam_0, cam_1 = _stage_data["camera_models"][0:2]
         
-        possible_poses = self.estimator.estimate_relative_pose_5pt(
+        solution = self.estimator.estimate_relative_pose_5pt(
             x2d_0, x2d_1, cam_0, cam_1, 
             _stage_data["ransac_options"]["5pt"],
             _stage_data["bundle_options"]["5pt"]
         )
         
-        if len(possible_poses) > 1:
-            logger.warning(f"{len(possible_poses)} possible solutions found"
-                           f". Choosing the first")
         
-        pose = possible_poses[0]
+        
+        pose , solution_metadata = solution
+        logger.info(f"Solution metadata: "
+                    f"{self.prune_solution_metadata(solution_metadata)}")
             
         return pose.Rt
         
@@ -373,6 +373,12 @@ class PoseEstimationProcessor(BasePreprocessor):
         for i in range(x.shape[0]):
             x_.append(x[i])
         return x_
+    
+    def prune_solution_metadata(self, solution_metadata):
+        """ 
+        
+        """
+        return {k:v for k, v in solution_metadata.items() if k != "inliers"}
 
 
 
