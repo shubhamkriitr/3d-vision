@@ -39,3 +39,15 @@ def compute_alignment_rotation(source_vector, target_vector):
     R = R.as_matrix() # it would be of shape (1, 3, 3)
     
     return R[0] # shape (3, 3)
+
+def compute_relative_pose(reference_absolute_pose, target_absolute_pose):
+    
+    R1, t1 = reference_absolute_pose[:, 0:3], reference_absolute_pose[:, 3:4]
+    R2, t2 = target_absolute_pose[:, 0:3], target_absolute_pose[:, 3:4]
+
+    R = R2 @ R1.T
+    t = t2 - R @ t1    
+    
+    Rt = np.concatenate([R, t], axis=1)
+    
+    return Rt

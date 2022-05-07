@@ -7,7 +7,7 @@ from visn.estimation.pose import PoseEstimator
 from visn.benchmark.benchmark import BenchMarker
 from visn.benchmark.metrics import compute_pose_error
 from visn.utils import logger
-from visn.process.utils import compute_alignment 
+from visn.process.utils import compute_alignment, compute_relative_pose
 import poselib
 from typing import Dict
 from visn.config import read_config
@@ -100,6 +100,10 @@ class BasePreprocessor(object):
             _stage_data["normalized_aligned_keypoints"] = \
                 self.rotate_keypoints(alignment_rotations,
                                       normalized_keypoints)
+        
+        if "relative_pose_gt" not in sample:
+            logger.info(f"Computing relative_pose_gt")
+            self.compute_relative_pose_ground_truth(sample, _stage_data)
             
         
         
@@ -183,6 +187,18 @@ class BasePreprocessor(object):
         """`source_vector` and `target_vector` are of shape (1, 3)
         """
         return compute_alignment(source_vector, target_vector)
+    
+    def compute_relative_pose_ground_truth(self, sample, _stage_data):
+        input_relative_poses = sample["input_relative_poses"]
+        
+        Rt_0 = np.array(input_relative_poses[0], dtype=np.float64)
+        Rt_1 = np.array(input_relative_poses[1], dtype=np.float64)
+        
+        Rt = compute_relative_pose(Rt_0, Rt_1)
+        
+        _stage_data["relative_pose_gt"] = Rt
+        
+        return Rt
     
     def extract_value(self, container: dict, key_sequences,
                       default_value=None):
@@ -429,7 +445,7 @@ class BenchmarkingProcessor(BasePreprocessor):
         }
         
         self.log_pose_errors(sample, sample[self.pipeline_stage])
-        
+        logger.info(f"{self.pipeline_stage} : {sample[self.pipeline_stage]}")
         return sample
     
     def log_pose_errors(self, sample, _stage_data: dict):
