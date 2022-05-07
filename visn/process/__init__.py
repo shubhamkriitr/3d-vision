@@ -203,6 +203,35 @@ class BasePreprocessor(object):
         theta = np.arccos(cos_theta)
         
         return normal_unit_vector, theta
+    
+    def extract_value(self, container: dict, key_sequences,
+                      default_value=None):
+        """ 
+        `container` a dict like key value structure
+        `key_sequences` a list of list of strings.
+        e.g. For [["a", "b"], ["c"], ["d", "e", "f"]], 
+            container["a"]["b"]
+            container["c"]
+            container["d"]["e"]["f"]
+            will be queried in order, and the first query that resolves
+            without KeyError will be returned.
+            If all queries result in KeyError then `default_value`
+            will be returned
+        """
+        value = None
+        error_count = 0
+        for key_seq in key_sequences:
+            try:
+                value = container
+                for k in key_seq:
+                    value = value[k]
+            except KeyError:
+                error_count += 1
+        
+        if error_count == len(key_sequences):
+            return default_value
+        
+        return value
 
 
 class Preprocessor(BasePreprocessor):
