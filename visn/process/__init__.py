@@ -224,7 +224,8 @@ class PoseEstimationProcessor(BasePreprocessor):
     
     def process_one_sample(self, sample):
         
-        sample[self.pipeline_stage] = {}
+        if self.pipeline_stage not in sample:
+            sample[self.pipeline_stage] = {}
         _stage_data = sample[self.pipeline_stage]
         
         ransac_3pt_up, ransac_5pt = self.prepare_ransac_options(sample, _stage_data)
