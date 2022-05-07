@@ -429,7 +429,7 @@ class BenchmarkingProcessor(BasePreprocessor):
                      poselib.estimate_relative_pose],
             args_kwargs=[args_kwargs_for_3pt_up, args_kwargs_for_5pt],
             use_same_args_kwargs_for_all=False,
-            num_trials=1000,
+            num_trials=20, # FIXME
             normalization_mode=None
         )
         
