@@ -94,7 +94,7 @@ class BaseDataset:
         self.data_root_dir = os.path.join(RESOURCE_ROOT, self.config["resource_scene"])
         self.use_prediction = self.config["use_prediction"]
 
-    def get_calibration(self, data_root_dir: str = DATA_ROOT) -> Dict[str, List]:
+    def get_calibration(self, data_root_dir: str) -> Dict[str, List]:
         # define required paths
         calibration_dir_path = os.path.join(data_root_dir, "calibration")
         image_size_file_path = os.path.join(calibration_dir_path, "image_size.txt")
@@ -113,7 +113,7 @@ class BaseDataset:
         return {"image_size": image_size, "K": k}
 
     @staticmethod
-    def get_groups(data_root_dir: str = DATA_ROOT) -> List[List[str]]:
+    def get_groups(data_root_dir: str) -> List[List[str]]:
         """
         File content is assumed to be similar to the example below:
             0000 0001
@@ -133,7 +133,7 @@ class BaseDataset:
         return groups
 
     @staticmethod
-    def get_ids(data_root_dir: str = DATA_ROOT, image_extension: str = IMG_EXT_PNG) -> List[str]:
+    def get_ids(data_root_dir: str, image_extension: str = IMG_EXT_PNG) -> List[str]:
         images_dir_path = os.path.join(data_root_dir, "images")
         files = os.listdir(images_dir_path)
         ids = [name.split(".")[0] for name in files
@@ -144,13 +144,13 @@ class BaseDataset:
         return str(index).rjust(self.id_digits, '0')
 
     @staticmethod
-    def get_image(id_: str, data_root_dir: str = DATA_ROOT, image_extension: str = IMG_EXT_PNG) -> np.ndarray:
+    def get_image(id_: str, data_root_dir: str, image_extension: str = IMG_EXT_PNG) -> np.ndarray:
         image_file_path = os.path.join(data_root_dir, "images", f"{id_}{image_extension}")
         img = cv.imread(image_file_path)
         return img
 
     @staticmethod
-    def get_relative_pose(id_: str, data_root_dir: str = DATA_ROOT) -> List[List[float]]:
+    def get_relative_pose(id_: str, data_root_dir: str) -> List[List[float]]:
         relative_pose_file_path = os.path.join(data_root_dir, "relative_pose", f"{id_}.txt")
         with open(relative_pose_file_path, "r") as f:
             content = f.read()
@@ -158,7 +158,7 @@ class BaseDataset:
         return rel_pose
 
     @staticmethod
-    def get_roll_pitch(id_: str, gth: bool = True, data_root_dir: str = DATA_ROOT) -> List[float]:
+    def get_roll_pitch(id_: str, gth: bool, data_root_dir: str) -> List[float]:
         # gth: True => get roll_pitch_gt
         # gth: False => get roll_pitch_pred
         if gth:
@@ -171,7 +171,7 @@ class BaseDataset:
         return rel_pose
 
     @staticmethod
-    def get_gravity(id_: str, gth: bool = True, data_root_dir: str = DATA_ROOT) -> List[float]:
+    def get_gravity(id_: str, gth: bool, data_root_dir: str) -> List[float]:
         # gth: True => get gravity_gt
         # gth: False => get gravity_pred
         if gth:
@@ -185,12 +185,19 @@ class BaseDataset:
 
     def __getitem__(self, id_: str):
         # load and return image, relative_pose, roll_pitch_gt and roll_pitch_pred
+        # TODO/ FIXME: better to declare getters as non static methods
+        # and use the root dir read from config, instead of having to pass
+        # it in the args
         out = {"img": self.get_image(id_, self.data_root_dir, self.image_extension),
                "rel_pose": self.get_relative_pose(id_, self.data_root_dir),
-               "rp_gt": self.get_roll_pitch(id_, gth=True),
-               "rp_pred": self.get_roll_pitch(id_, gth=False),
-               "gr_gt": self.get_gravity(id_, gth=True),
-               "gr_pred": self.get_gravity(id_, gth=False)}
+               "rp_gt": self.get_roll_pitch(id_, gth=True,
+                            data_root_dir=self.data_root_dir),
+               "rp_pred": self.get_roll_pitch(id_, gth=False,
+                            data_root_dir=self.data_root_dir),
+               "gr_gt": self.get_gravity(id_, gth=True,
+                            data_root_dir=self.data_root_dir),
+               "gr_pred": self.get_gravity(id_, gth=False,
+                            data_root_dir=self.data_root_dir)}
         return out
     
     def __len__(self):
