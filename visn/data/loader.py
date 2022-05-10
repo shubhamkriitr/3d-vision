@@ -84,19 +84,19 @@ class BaseDataset:
         self._init_from_config(config)
 
         # load relevant data
-        self.ids = self.get_ids(self.data_root_dir, self.image_extension)
+        self.ids = self.get_ids()
         self.id_digits = len(self.ids[0])
-        self.calibration = self.get_calibration(self.data_root_dir)
-        self.groups = self.get_groups(self.data_root_dir)
+        self.calibration = self.get_calibration()
+        self.groups = self.get_groups()
 
     def _init_from_config(self, config):
         self.config = {**read_config()["dataset"], **config}
         self.data_root_dir = os.path.join(RESOURCE_ROOT, self.config["resource_scene"])
         self.use_prediction = self.config["use_prediction"]
 
-    def get_calibration(self, data_root_dir: str) -> Dict[str, List]:
+    def get_calibration(self) -> Dict[str, List]:
         # define required paths
-        calibration_dir_path = os.path.join(data_root_dir, "calibration")
+        calibration_dir_path = os.path.join(self.data_root_dir, "calibration")
         image_size_file_path = os.path.join(calibration_dir_path, "image_size.txt")
         k_file_path = os.path.join(calibration_dir_path, "K.txt")
 
@@ -112,8 +112,7 @@ class BaseDataset:
 
         return {"image_size": image_size, "K": k}
 
-    @staticmethod
-    def get_groups(data_root_dir: str) -> List[List[str]]:
+    def get_groups(self) -> List[List[str]]:
         """
         File content is assumed to be similar to the example below:
             0000 0001
@@ -121,7 +120,7 @@ class BaseDataset:
             0002 0003
             0004 0005
         """
-        groups_file_path = os.path.join(data_root_dir, "groups.txt")
+        groups_file_path = os.path.join(self.data_root_dir, "groups.txt")
         with open(groups_file_path, "r") as f:
             lines = f.readlines()
         groups = []
@@ -132,72 +131,60 @@ class BaseDataset:
 
         return groups
 
-    @staticmethod
-    def get_ids(data_root_dir: str, image_extension: str = IMG_EXT_PNG) -> List[str]:
-        images_dir_path = os.path.join(data_root_dir, "images")
+    def get_ids(self) -> List[str]:
+        images_dir_path = os.path.join(self.data_root_dir, "images")
         files = os.listdir(images_dir_path)
         ids = [name.split(".")[0] for name in files
-                     if name.endswith(image_extension)]
+                     if name.endswith(self.image_extension)]
         return ids
 
     def get_id(self, index: int) -> str:
         return str(index).rjust(self.id_digits, '0')
 
-    @staticmethod
-    def get_image(id_: str, data_root_dir: str, image_extension: str = IMG_EXT_PNG) -> np.ndarray:
-        image_file_path = os.path.join(data_root_dir, "images", f"{id_}{image_extension}")
+    def get_image(self, id_: str) -> np.ndarray:
+        image_file_path = os.path.join(self.data_root_dir, "images", f"{id_}{self.image_extension}")
         img = cv.imread(image_file_path)
         return img
 
-    @staticmethod
-    def get_relative_pose(id_: str, data_root_dir: str) -> List[List[float]]:
-        relative_pose_file_path = os.path.join(data_root_dir, "relative_pose", f"{id_}.txt")
+    def get_relative_pose(self, id_: str) -> List[List[float]]:
+        relative_pose_file_path = os.path.join(self.data_root_dir, "relative_pose", f"{id_}.txt")
         with open(relative_pose_file_path, "r") as f:
             content = f.read()
             rel_pose = [[float(y) for y in x.split(" ")] for x in content.split("\n") if x]
         return rel_pose
 
-    @staticmethod
-    def get_roll_pitch(id_: str, gth: bool, data_root_dir: str) -> List[float]:
+    def get_roll_pitch(self, id_: str, gth: bool) -> List[float]:
         # gth: True => get roll_pitch_gt
         # gth: False => get roll_pitch_pred
         if gth:
-            roll_pitch_file_path = os.path.join(data_root_dir, "roll_pitch_gt", f"{id_}.txt")
+            roll_pitch_file_path = os.path.join(self.data_root_dir, "roll_pitch_gt", f"{id_}.txt")
         else:
-            roll_pitch_file_path = os.path.join(data_root_dir, "roll_pitch_pred", f"{id_}.txt")
+            roll_pitch_file_path = os.path.join(self.data_root_dir, "roll_pitch_pred", f"{id_}.txt")
         with open(roll_pitch_file_path, "r") as f:
             content = f.read()
             rel_pose = [float(x) for x in content.split(" ")]
         return rel_pose
 
-    @staticmethod
-    def get_gravity(id_: str, gth: bool, data_root_dir: str) -> List[float]:
+    def get_gravity(self, id_: str, gth: bool) -> List[float]:
         # gth: True => get gravity_gt
         # gth: False => get gravity_pred
         if gth:
-            gravity_file_path = os.path.join(data_root_dir, "gravity_gt", f"{id_}.txt")
+            gravity_file_path = os.path.join(self.data_root_dir, "gravity_gt", f"{id_}.txt")
         else:
-            gravity_file_path = os.path.join(data_root_dir, "gravity_pred", f"{id_}.txt")
+            gravity_file_path = os.path.join(self.data_root_dir, "gravity_pred", f"{id_}.txt")
         with open(gravity_file_path, "r") as f:
             content = f.read()
             rel_pose = [float(x) for x in content.split(" ")]
         return rel_pose
 
     def __getitem__(self, id_: str):
-        # load and return image, relative_pose, roll_pitch_gt and roll_pitch_pred
-        # TODO/ FIXME: better to declare getters as non static methods
-        # and use the root dir read from config, instead of having to pass
-        # it in the args
-        out = {"img": self.get_image(id_, self.data_root_dir, self.image_extension),
-               "rel_pose": self.get_relative_pose(id_, self.data_root_dir),
-               "rp_gt": self.get_roll_pitch(id_, gth=True,
-                            data_root_dir=self.data_root_dir),
-               "rp_pred": self.get_roll_pitch(id_, gth=False,
-                            data_root_dir=self.data_root_dir),
-               "gr_gt": self.get_gravity(id_, gth=True,
-                            data_root_dir=self.data_root_dir),
-               "gr_pred": self.get_gravity(id_, gth=False,
-                            data_root_dir=self.data_root_dir)}
+        # load and return image, relative_pose, roll_pitch_gt/pred and gravity_gt/pred
+        out = {"img": self.get_image(id_),
+               "rel_pose": self.get_relative_pose(id_),
+               "rp_gt": self.get_roll_pitch(id_, gth=True),
+               "rp_pred": self.get_roll_pitch(id_, gth=False),
+               "gr_gt": self.get_gravity(id_, gth=True),
+               "gr_pred": self.get_gravity(id_, gth=False)}
         return out
     
     def __len__(self):
