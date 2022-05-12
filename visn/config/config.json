@@ -13,7 +13,7 @@
     "pipeline_stage": "_stage_preprocess",
     "keypoint_matcher": "OpenCvKeypointMatcher",
     "gravity_estimator": "BaseGravityEstimator",
-    "keypoint_threshold": 0.25
+    "keypoint_threshold": 0.75
   },
   "pose_estimator": {
     "object": "PoseEstimationProcessor",

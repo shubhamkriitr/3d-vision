@@ -40,7 +40,7 @@ def compute_alignment_rotation(source_vector, target_vector):
     
     return R[0] # shape (3, 3)
 
-def compute_relative_pose(reference_absolute_pose, target_absolute_pose):
+def _legacy_compute_relative_pose(reference_absolute_pose, target_absolute_pose):
     
     R1, t1 = reference_absolute_pose[:, 0:3], reference_absolute_pose[:, 3:4]
     R2, t2 = target_absolute_pose[:, 0:3], target_absolute_pose[:, 3:4]
@@ -50,4 +50,24 @@ def compute_relative_pose(reference_absolute_pose, target_absolute_pose):
     
     Rt = np.concatenate([R, t], axis=1)
     
+    return Rt
+
+def compute_relative_pose(reference_absolute_pose, target_absolute_pose):
+    # FIXME: Read docs and adjust
+    reference_absolute_pose = reference_absolute_pose/ reference_absolute_pose[2, 3]
+    target_absolute_pose = target_absolute_pose/ target_absolute_pose[2, 3]
+    
+    R1, t1 = reference_absolute_pose[:, 0:3], reference_absolute_pose[:, 3:4]
+    R2, t2 = target_absolute_pose[:, 0:3], target_absolute_pose[:, 3:4]
+
+    R1 = R1.T
+    R2 = R2.T
+    
+    
+    R = R2 @ R1.T
+    t = t2 - R @ t1    
+    
+    Rt = np.concatenate([R, t], axis=1)
+    
+    Rt = Rt/ Rt[2, 3]
     return Rt
