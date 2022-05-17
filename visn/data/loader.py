@@ -181,10 +181,9 @@ class BaseDataset:
             roll_pitch_file_path = os.path.join(self.data_root_dir, "roll_pitch_gt", f"{id_}.txt")
         else:
             roll_pitch_file_path = os.path.join(self.data_root_dir, "roll_pitch_pred", f"{id_}.txt")
-        with open(roll_pitch_file_path, "r") as f:
-            content = f.read()
-            rel_pose = [float(x) for x in content.split(" ")]
-        return rel_pose
+        
+        roll_pitch = np.loadtxt(roll_pitch_file_path)
+        return roll_pitch
 
     def get_gravity(self, id_: str, gth: bool) -> List[float]:
         # gth: True => get gravity_gt
@@ -193,9 +192,8 @@ class BaseDataset:
             gravity_file_path = os.path.join(self.data_root_dir, "gravity_gt", f"{id_}.txt")
         else:
             gravity_file_path = os.path.join(self.data_root_dir, "gravity_pred", f"{id_}.txt")
-        with open(gravity_file_path, "r") as f:
-            content = f.read()
-            rel_pose = [float(x) for x in content.split(" ")]
+        
+        rel_pose = np.loadtxt(gravity_file_path)
         return rel_pose
 
     def __getitem__(self, id_: str):
