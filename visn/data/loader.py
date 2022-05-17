@@ -81,6 +81,7 @@ class BaseDataset:
     """
     def __init__(self, image_extension: str = IMG_EXT_PNG, config: Dict = {}, **kwargs) -> None:
         self.image_extension = image_extension
+        self.same_intrinsic_matrix_for_all = True
         self._init_from_config(config)
 
         # load relevant data
@@ -88,7 +89,6 @@ class BaseDataset:
         self.id_digits = len(self.ids[0])
         self.calibration = None # TODO may remove this attr
         self.groups = self.get_groups()
-        self.same_intrinsic_matrix_for_all = True
 
     def _init_from_config(self, config):
         self.config = {**read_config()["dataset"], **config}
