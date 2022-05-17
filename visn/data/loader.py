@@ -126,15 +126,12 @@ class BaseDataset:
         
         logger.debug(f"Loading image size from: {image_size_file_path}")
         logger.debug(f"Loading K from : {k_file_path}")
+        
         # load image size
-        with open(image_size_file_path, "r") as f:
-            content = f.read()
-            image_size = [int(x) for x in content.split("\n")]
+        image_size = np.loadtxt(image_size_file_path)
 
         # load K
-        with open(k_file_path, "r") as f:
-            content = f.read()
-            k = [[float(y) for y in x.split(" ")] for x in content.split("\n") if x]
+        k = np.loadtxt(k_file_path)
 
         return {"image_size": image_size, "K": k}
 
@@ -174,9 +171,7 @@ class BaseDataset:
 
     def get_relative_pose(self, id_: str) -> List[List[float]]:
         relative_pose_file_path = os.path.join(self.data_root_dir, "relative_pose", f"{id_}.txt")
-        with open(relative_pose_file_path, "r") as f:
-            content = f.read()
-            rel_pose = [[float(y) for y in x.split(" ")] for x in content.split("\n") if x]
+        rel_pose = np.loadtxt(relative_pose_file_path)
         return rel_pose
 
     def get_roll_pitch(self, id_: str, gth: bool) -> List[float]:
