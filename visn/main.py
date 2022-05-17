@@ -29,7 +29,11 @@ class CommandLineHandlerV1(BaseCommandLineHandler):
         
         outputs = pipeline.run()
         import pickle
-        with open('outputs.pickle', 'wb') as handle:
+        from visn.utils import get_timestamp_str, logger
+        output_file_name = f"outputs_{get_timestamp_str()}.pickle"
+        logger.info(f"Saving outputs to : {output_file_name}")
+        
+        with open(output_file_name, 'wb') as handle:
             pickle.dump(outputs, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
 

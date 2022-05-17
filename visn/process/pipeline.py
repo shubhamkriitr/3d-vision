@@ -46,6 +46,9 @@ class BasePipeline:
             for step  in self.steps:
                 running_output = step(running_output)
                 
+            output = extract_relevant_info(running_output)
+            outputs.append(output)
+            
         for step in self.steps_after_end:
             step()
             
@@ -55,6 +58,8 @@ class BasePipeline:
         logger.debug(f"TODO#") # TODO
 
 
+def extract_relevant_info(running_output):
+    return running_output  #TODO
 
         
         
