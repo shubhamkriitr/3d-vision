@@ -86,20 +86,46 @@ class BaseDataset:
         # load relevant data
         self.ids = self.get_ids()
         self.id_digits = len(self.ids[0])
-        self.calibration = self.get_calibration()
+        self.calibration = None # TODO may remove this attr
         self.groups = self.get_groups()
+        self.same_intrinsic_matrix_for_all = True
 
     def _init_from_config(self, config):
         self.config = {**read_config()["dataset"], **config}
         self.data_root_dir = os.path.join(RESOURCE_ROOT, self.config["resource_scene"])
         self.use_prediction = self.config["use_prediction"]
+        if "same_intrinsic_matrix_for_all" in self.config:
+            self.same_intrinsic_matrix_for_all \
+                = self.config["same_intrinsic_matrix_for_all"]
 
-    def get_calibration(self) -> Dict[str, List]:
+    def _get_calibration(self) -> Dict[str, List]:
         # define required paths
         calibration_dir_path = os.path.join(self.data_root_dir, "calibration")
         image_size_file_path = os.path.join(calibration_dir_path, "image_size.txt")
         k_file_path = os.path.join(calibration_dir_path, "K.txt")
 
+        # load image size
+        with open(image_size_file_path, "r") as f:
+            content = f.read()
+            image_size = [int(x) for x in content.split("\n")]
+
+        # load K
+        with open(k_file_path, "r") as f:
+            content = f.read()
+            k = [[float(y) for y in x.split(" ")] for x in content.split("\n") if x]
+
+        return {"image_size": image_size, "K": k}
+    
+    def get_calibration(self, id_=None):
+        if id_ is None or self.same_intrinsic_matrix_for_all:
+            return self._get_calibration()
+        calibration_dir_path = os.path.join(self.data_root_dir, "calibration")
+        image_size_file_path = os.path.join(calibration_dir_path,
+                                            f"image_size_{id_}.txt")
+        k_file_path = os.path.join(calibration_dir_path, f"K_{id_}.txt")
+        
+        logger.debug(f"Loading image size from: {image_size_file_path}")
+        logger.debug(f"Loading K from : {k_file_path}")
         # load image size
         with open(image_size_file_path, "r") as f:
             content = f.read()
@@ -221,7 +247,7 @@ class GroupedImagesDataset(BaseDataset):
             rp_pred_.append(rp_pred)
             gr_gt_.append(gr_gt)
             gr_pred_.append(gr_pred)
-            k_.append(self.calibration["K"])
+            k_.append(self.get_calibration(id_)["K"])
         gr_ = gr_pred_ if self.use_prediction else gr_gt_
 
         # structure output
