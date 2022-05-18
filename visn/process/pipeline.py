@@ -99,6 +99,16 @@ class AdHocTransforms(BasePreprocessor):
         sample['input_roll_pitch_gt'] = deepcopy(sample['input_gravity'])
         sample['input_gravity_gt'] = deepcopy(sample['input_gravity'])
         
+        # slightly rotate the second image to test the effect
+        from scipy.spatial.transform import Rotation
+        Rdelta = Rotation.from_euler("zyx", [10, 0, 0], degrees=True)
+        
+        R1_new = Rdelta.as_matrix()@R1
+        
+        Rt1 = np.concatenate([R1_new, t1], axis=1)
+        sample['input_relative_poses'][1] = Rt1
+        
+        
         
     def compute_dummy_gravity_vector_from_rotation_matrices(self):
         pass
