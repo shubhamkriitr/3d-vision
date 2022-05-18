@@ -51,7 +51,7 @@ class DTUtoVisnConverter:
         return image_ids
     
     
-    def process_one_image(self, sr_num, image_id, dtu_scan_dir, target_dir)
+    def process_one_image(self, sr_num, image_id, dtu_scan_dir, target_dir):
         img_file_name = f"rect_{image_id}_6_r5000.png"
         img_path = os.path.join(dtu_scan_dir, "images", img_file_name)
         
@@ -68,6 +68,52 @@ class DTUtoVisnConverter:
         logger.info(f"Reading cam file from : {cam_file_path}")
         
         Rt, K, size = self.read_cam_file(cam_file_path)
+        gravity = self.compute_gravity_from_pose(Rt)
+        # paths
+        out_calib_path, out_pose_path, out_size_path, out_gravity_gt_path,\
+            out_gravity_pred_path, out_rp_gt_path, out_rp_pred_path \
+                = self.create_absolute_output_paths(target_dir, out_sr_num)
+        
+        DUMMY_ROLL_PITCH = [0, 0]
+        np.savetxt(out_calib_path, K)
+        np.savetxt(out_pose_path, Rt)
+        np.savetxt(out_size_path, size)
+        np.savetxt(out_gravity_gt_path, gravity)
+        np.savetxt(out_gravity_pred_path, gravity)
+        np.savetxt(out_rp_gt_path, DUMMY_ROLL_PITCH)
+        np.savetxt(out_rp_pred_path, DUMMY_ROLL_PITCH)
+
+    def create_absolute_output_paths(self, target_dir, out_sr_num):
+        out_calib_path = os.path.join(target_dir, DIR_CALIBRATION,
+                                      f"K_{out_sr_num}.txt")
+        out_pose_path = os.path.join(target_dir, DIR_REL_POSE,
+                                     f"{out_sr_num}.txt")
+        out_size_path = os.path.join(target_dir, DIR_CALIBRATION, 
+                                     f"image_size_{out_sr_num}.txt")
+        out_gravity_gt_path = os.path.join(target_dir, DIR_GRAVITY_GT,
+                                           f"{out_sr_num}.txt")
+        out_gravity_pred_path = os.path.join(target_dir, DIR_GRAVITY_PRED,
+                                           f"{out_sr_num}.txt")
+        out_rp_gt_path = os.path.join(target_dir, DIR_ROLL_PITCH_GT,
+                                           f"{out_sr_num}.txt")
+        out_rp_pred_path = os.path.join(target_dir, DIR_ROLL_PITCH_PRED,
+                                           f"{out_sr_num}.txt")
+                                           
+        return out_calib_path,out_pose_path,out_size_path,out_gravity_gt_path,\
+            out_gravity_pred_path,out_rp_gt_path,out_rp_pred_path
+        
+        
+    
+    def compute_gravity_from_pose(self, Rt):
+        R = Rt[:, 0:3]
+        
+        g_ref = np.array([[0], [0], [-1]], dtype=np.float64)
+        
+        g_new = R @ g_ref
+        
+        g_new = np.ravel(g_new)
+        
+        return g_new
         
     
     def read_cam_file(self, file_loc):
@@ -88,6 +134,7 @@ class DTUtoVisnConverter:
             if text == "extrinsic":
                 Rt_lines = lines[idx+1:idx+1+3] # ignore last row of 4x4 matrxi
                 Rt_text = "\n".join(Rt_lines)
+                Rt  = np.fromstring(Rt_text, sep=" ")
                 # which contains 0 0 0 1
                 idx += 5
                 item_count += 1
@@ -95,6 +142,7 @@ class DTUtoVisnConverter:
             if text == "intrinsic":
                 K_lines = lines[idx+1, idx+3]
                 K_text = "\n".join(K_lines)
+                K = np.fromstring(K_text, sep=" ")
                 idx += 4
                 item_count += 1
                 continue
@@ -102,8 +150,14 @@ class DTUtoVisnConverter:
             if item_count == 2: # Rt and K already read
                 if text != "":
                     size_text = text
+                    size = np.fromstring(size_text, sep=" ").reshape(2, 1)
                     item_count +=1
+                    idx += 1
                     continue
+            
+            idx += 1
+            
+            return Rt, K, size
             
             
             
