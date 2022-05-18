@@ -135,14 +135,16 @@ class DTUtoVisnConverter:
                 Rt_lines = lines[idx+1:idx+1+3] # ignore last row of 4x4 matrxi
                 Rt_text = "\n".join(Rt_lines)
                 Rt  = np.fromstring(Rt_text, sep=" ")
+                Rt = Rt.reshape((3, 4))
                 # which contains 0 0 0 1
                 idx += 5
                 item_count += 1
                 continue
             if text == "intrinsic":
-                K_lines = lines[idx+1, idx+3]
+                K_lines = lines[idx+1 : idx+1+3]
                 K_text = "\n".join(K_lines)
                 K = np.fromstring(K_text, sep=" ")
+                K = K.reshape((3, 3))
                 idx += 4
                 item_count += 1
                 continue
@@ -157,7 +159,7 @@ class DTUtoVisnConverter:
             
             idx += 1
             
-            return Rt, K, size
+        return Rt, K, size
             
             
             
