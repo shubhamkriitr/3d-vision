@@ -24,9 +24,11 @@ ALL_VISN_DIRS = [
 class DTUtoVisnConverter:
     
     def __init__(self) -> None:
+        # Add attrs if required
         pass
-    
+
     def convert(self, input_dir, target_dir):
+        self.init_visn_folder_structure(target_dir)
         image_ids = self.inspect_dtu_data_dir(input_dir)
         for sr_num, image_id in enumerate(image_ids, 1):
             logger.info(f"Processing file #{sr_num} Id: {image_id} ")
@@ -69,7 +71,44 @@ class DTUtoVisnConverter:
         
     
     def read_cam_file(self, file_loc):
-        pass
+        lines = None
+        
+        with open(file_loc, "r") as f:
+            lines = f.readlines()
+        
+        idx = 0
+        Rt = None
+        K = None
+        size = None
+        item_count = 0
+        while idx < len(lines):
+            text = lines[idx].strip()
+            if item_count == 3:
+                break
+            if text == "extrinsic":
+                Rt_lines = lines[idx+1:idx+1+3] # ignore last row of 4x4 matrxi
+                Rt_text = "\n".join(Rt_lines)
+                # which contains 0 0 0 1
+                idx += 5
+                item_count += 1
+                continue
+            if text == "intrinsic":
+                K_lines = lines[idx+1, idx+3]
+                K_text = "\n".join(K_lines)
+                idx += 4
+                item_count += 1
+                continue
+            
+            if item_count == 2: # Rt and K already read
+                if text != "":
+                    size_text = text
+                    item_count +=1
+                    continue
+            
+            
+            
+            
+        
         
     
     def init_visn_folder_structure(self, target_dir):
@@ -81,8 +120,8 @@ class DTUtoVisnConverter:
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input-dir", "-i", type=str)
-    ap.add_argument("--output-dir", "-o", type=str)
+    ap.add_argument("--input-dir", "-i", type=str, default="resources/dtu/scan1")
+    ap.add_argument("--output-dir", "-o", type=str, default="resources/dtu_visn_test")
     
     args = ap.parse_args()
     
