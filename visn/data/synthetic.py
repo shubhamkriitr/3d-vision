@@ -159,13 +159,39 @@ class SyntheticVisnDataGenerator(object):
         
         K0, K1, Rt0, Rt1, world_points = self.get_seed_pair_data()
         
+        kp_1 = self.transform_world_points_to_img(world_points, K0, Rt0)
+        kp_2 = self.transform_world_points_to_img(world_points, K1, Rt1)
+        
+        g_0 = self.compute_gravity_from_pose(Rt0)
+        g_1 = self.compute_gravity_from_pose(Rt1)
+        
+        
     
+    def transform_world_points_to_img(self, xW, K, Rt):
+        """ 
+        xW of shape (N, 3)
+        """
+        xW_hom = self.to_homogeneous(xW)
+        x_hom = K @ Rt @ xW_hom.T # 3 x 4  x   4 x N
+        x = self.to_non_homogeneous(x_hom)
+        return x
     
     def to_homogeneous(self, x):
-        return
+        """ 
+        x of shape (N, m) 
+        returns array of shape (N, m+1)
+        """
+        ones = np.ones(shape=(x.shape[0], 1), dtype=x.dtype)
+        x_hom = np.concatenate([x, ones], axis=1)
+        return x_hom
     
     def to_non_homogeneous(self, x):
-        return
+        """ 
+        x of shape (N, m) 
+        returns array of shape (N, m-1)
+        """
+        x_non_hom = x[:, 0:-1] / x[:, -1]
+        return x_non_hom
         
 
     def get_seed_pair_data(self):
