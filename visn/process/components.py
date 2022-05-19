@@ -266,16 +266,22 @@ class PoseEstimationProcessor(BasePreprocessor):
         }
         _stage_data["camera_models"] = [cam_0, cam_1]
         
-        relative_pose_Rt_3pt_up, relative_pose_Rt_3pt_up_aligned = \
+        (relative_pose_Rt_3pt_up, relative_pose_Rt_3pt_up_aligned, 
+        solution_metadata_3pt) = \
             self.process_3point_estimation(sample, _stage_data)
             
-        relative_pose_Rt_5pt = \
+        relative_pose_Rt_5pt, solution_metadata_5pt = \
             self.process_5point_estimation(sample, _stage_data)
             
         _stage_data["pose"] = {
             "3pt_up": relative_pose_Rt_3pt_up,
             "3pt_up_aligned": relative_pose_Rt_3pt_up_aligned,
             "5pt": relative_pose_Rt_5pt
+        }
+        
+        _stage_data["solution_metadata"] = {
+            "3pt_up": solution_metadata_3pt,
+            "5pt": solution_metadata_5pt
         }
         
         
@@ -305,8 +311,9 @@ class PoseEstimationProcessor(BasePreprocessor):
         
         
         pose, solution_metadata = solution
+        solution_metadata = self.prune_solution_metadata(solution_metadata)
         logger.info(f"Solution metadata: "
-                    f"{self.prune_solution_metadata(solution_metadata)}")
+                    f"{solution_metadata}")
         
         #pose in normalized/aligned coordinate
         Rt_norm_aligned =  pose.Rt
@@ -322,7 +329,7 @@ class PoseEstimationProcessor(BasePreprocessor):
         
         
             
-        return Rt_norm, Rt_norm_aligned
+        return Rt_norm, Rt_norm_aligned, solution_metadata
         
         
     def process_5point_estimation(self, sample, _stage_data):
@@ -343,10 +350,11 @@ class PoseEstimationProcessor(BasePreprocessor):
         
         
         pose , solution_metadata = solution
+        solution_metadata = self.prune_solution_metadata(solution_metadata)
         logger.info(f"Solution metadata: "
-                    f"{self.prune_solution_metadata(solution_metadata)}")
+                    f"{solution_metadata}")
             
-        return pose.Rt
+        return pose.Rt, solution_metadata
         
         
         
