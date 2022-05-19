@@ -14,7 +14,7 @@ default_ransac_options = poselib.RansacOptions()
 default_bundle_options = poselib.BundleOptions()
 
 DEFAULT_POSELIB_BUNDLE_OPTIONS = {
-    'max_iterations': 0, 'loss_scale': 1.0, 'loss_type': 'CAUCHY',
+    'max_iterations': 2, 'loss_scale': 1.0, 'loss_type': 'CAUCHY',
     'gradient_tol': 1e-10, 'step_tol': 1e-08, 'initial_lambda': 0.001,
     'min_lambda': 1e-10, 'max_lambda': 10000000000.0, 'verbose': False}
 
@@ -32,7 +32,7 @@ class PoseEstimator(object):
         self.config = config
     
     def prepare_cam(self, model='SIMPLE_PINHOLE', 
-                width=1200, height=800,  params=[4, 0, 0]):
+                width=1200, height=800,  params=[1, 0, 0]):
         # TODO: Adjust based on data
         return {'model': model, 'width': width,
                 'height': height, 'params': params}
