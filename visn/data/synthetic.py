@@ -139,6 +139,7 @@ DIR_IMAGES = "images"
 DIR_REL_POSE = "relative_pose"
 DIR_ROLL_PITCH_GT = "roll_pitch_gt"
 DIR_ROLL_PITCH_PRED = "roll_pitch_pred"
+DIR_MATCHED_KEY_POINTS = "matched_keypoints"
 
 ALL_VISN_DIRS = [
     DIR_CALIBRATION,
@@ -147,16 +148,18 @@ ALL_VISN_DIRS = [
     DIR_IMAGES,
     DIR_REL_POSE,
     DIR_ROLL_PITCH_GT,
-    DIR_ROLL_PITCH_PRED
+    DIR_ROLL_PITCH_PRED,
+    DIR_MATCHED_KEY_POINTS
 ]
 class SyntheticVisnDataGenerator(object):
     
     def __init__(self) -> None:
         pass
     
-    def generate(self, num_pairs, output_dir, *args, **kwargs):
+    def generate(self, num_pairs, output_dir,  *args, **kwargs):
         self.init_visn_folder_structure(output_dir)
         
+        assert num_pairs == 1, "currently only single pair (1) is supported"
         K0, K1, Rt0, Rt1, world_points = self.get_seed_pair_data()
         
         kp_1 = self.transform_world_points_to_img(world_points, K0, Rt0)
@@ -165,6 +168,37 @@ class SyntheticVisnDataGenerator(object):
         g_0 = self.compute_gravity_from_pose(Rt0)
         g_1 = self.compute_gravity_from_pose(Rt1)
         
+        self.save_single_image_data(
+            sr_num=1, target_dir=output_dir,
+            K=K0, Rt=Rt0, size=[[500], [500]], 
+            gravity=g_0
+        )
+        self.save_single_image_data(
+            sr_num=2, target_dir=output_dir,
+            K=K1, Rt=Rt1, size=[[500], [500]], 
+            gravity=g_1
+        )
+        
+        self.save_matched_keypoints(
+            target_dir=output_dir, sr_num_1=1, sr_num_2=2, kp_1=kp_1, kp_2=kp_2
+        )
+        
+        
+        
+
+    def save_matched_keypoints(self, target_dir, 
+                               sr_num_1, sr_num_2, kp_1, kp_2):
+        
+        matched_kps = np.concatenate([kp_1, kp_2], axis=1)
+        out_sr_num_1 = str(sr_num_1).zfill(4)
+        out_sr_num_2 = str(sr_num_2).zfill(4)
+        
+        filename = f"kp_matches_{out_sr_num_1}_{out_sr_num_2}.txt"
+        
+        kp_match_output_path = os.path.join(target_dir, DIR_MATCHED_KEY_POINTS,
+                                            filename)
+        
+        np.savetxt(kp_match_output_path, matched_kps)    
         
     
     def transform_world_points_to_img(self, xW, K, Rt):
@@ -173,6 +207,7 @@ class SyntheticVisnDataGenerator(object):
         """
         xW_hom = self.to_homogeneous(xW)
         x_hom = K @ Rt @ xW_hom.T # 3 x 4  x   4 x N
+        x_hom = x_hom.T # N x 3
         x = self.to_non_homogeneous(x_hom)
         return x
     
@@ -190,7 +225,8 @@ class SyntheticVisnDataGenerator(object):
         x of shape (N, m) 
         returns array of shape (N, m-1)
         """
-        x_non_hom = x[:, 0:-1] / x[:, -1]
+        x_non_hom = x / x[:, x.shape[1]-1:x.shape[1]]
+        x_non_hom = x_non_hom[:, 0:-1] #drop last col
         return x_non_hom
         
 
@@ -224,7 +260,7 @@ class SyntheticVisnDataGenerator(object):
         
         
         world_points = np.array(
-            [10, 30, 10],
+            [[10, 30, 10],
             [10, 40, 10],
             [20, 20, 15],
             [20, 30, 15],
@@ -235,24 +271,21 @@ class SyntheticVisnDataGenerator(object):
             [0, 30, 30],
             [30, 0, 30],
             [35, 35, 35],
-            [40, 35, 35], dtype=np.float64)
+            [40, 35, 35]], dtype=np.float64)
         
         
         
         return K0, K1, Rt0, Rt1, world_points
+    
         
     
-    def save_single_image_data(self, sr_num,
-                               image_id, dtu_scan_dir, target_dir):
+    def save_single_image_data(self, sr_num, target_dir, K,
+                               Rt, size, gravity, *args):
         
         
         out_sr_num = str(sr_num).zfill(4)
         
         # TODO: @ Implement
-        K = None
-        Rt = None
-        size = None
-        gravity = None
         image_data = np.ones(shape=tuple(np.ravel(size)))
         DUMMY_ROLL_PITCH = [0, 0]
         
@@ -311,7 +344,10 @@ class SyntheticVisnDataGenerator(object):
     
     
 if __name__ == "__main__":
-    datagen = CameraPairDataGenerator()
-    datagen.get_all()
+    # datagen = CameraPairDataGenerator()
+    # datagen.get_all()
+    datagen = SyntheticVisnDataGenerator()
+    datagen.generate(1, "__temp__/synthetic_data")
+    
     
     
