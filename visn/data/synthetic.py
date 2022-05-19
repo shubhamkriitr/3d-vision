@@ -3,7 +3,7 @@ from scipy.spatial.transform import Rotation
 import os
 import shutil
 import matplotlib
-
+import imageio
 class SyntheticDataGenerator(object):
     def __init__(self) -> None:
         pass
@@ -184,8 +184,18 @@ class SyntheticVisnDataGenerator(object):
             target_dir=output_dir, sr_num_1=1, sr_num_2=2, kp_1=kp_1, kp_2=kp_2
         )
         
+        groups_path = os.path.join(output_dir, "groups.txt")
+        self.save_group(sr_num_1=1, sr_num_2=2, output_path=groups_path)
         
-        
+    def save_group(self, sr_num_1, sr_num_2, output_path, mode="overwrite"):
+        """
+        TODO: add mode `append` later to modify same group file
+        """
+        out_sr_num_1 = str(sr_num_1).zfill(4)
+        out_sr_num_2 = str(sr_num_2).zfill(4)
+        assert mode == "overwrite" # TODO remove later
+        with open(output_path, "w") as f:
+            f.write(f"{out_sr_num_1} {out_sr_num_2}\n")
 
     def save_matched_keypoints(self, target_dir, 
                                sr_num_1, sr_num_2, kp_1, kp_2):
@@ -241,8 +251,8 @@ class SyntheticVisnDataGenerator(object):
         )
         K1 = np.array(
             [
-                [1, 0, 0],
-                [0, 1, 0],
+                [100, 0, 0],
+                [0, 100, 0],
                 [0, 0, 1]
             ]
         )
@@ -299,7 +309,7 @@ class SyntheticVisnDataGenerator(object):
         
         
         # save to files
-        matplotlib.image.imsave(out_img_path, image_data)
+        imageio.imwrite(out_img_path, image_data)
         np.savetxt(out_calib_path, K)
         np.savetxt(out_pose_path, Rt)
         np.savetxt(out_size_path, size)
