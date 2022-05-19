@@ -1,9 +1,11 @@
 from visn.process.components import (BasePreprocessor, PoseEstimationProcessor,
                           BenchmarkingProcessor)
 from visn.data.loader import SequentialDataLoader, GroupedImagesDataset
-from visn.utils import logger
+from visn.utils import logger, get_timestamp_str
 from visn.config import read_config
 from typing import Dict
+import pandas as pd
+import numpy as np
 
 
 class BasePipeline:
@@ -51,16 +53,57 @@ class BasePipeline:
             outputs.append(output)
             
         for step in self.steps_after_end:
-            step()
+            step(outputs)
             
         return outputs
     
     def print_full_summary(self, *args, **kwargs):
-        logger.debug(f"TODO#") # TODO
+        outputs = args[0]
+        
+        error_summary = []
+        item_names = [
+            "R_err", "t_err", "min_iterations", 
+            "max_epipolar_error", "success_prob",
+            'refinements', 'iterations', 'num_inliers', 'inlier_ratio', 
+            'model_score'
+        ]
+        
+        solver_types = ["3pt",  "5pt"]
+        columns = []
+        for s in solver_types:
+            for i in item_names:
+                columns.append(s+"_"+i)
+        
+        data = {
+            c: [] for c in columns
+        }
+        
+        for batch in outputs:
+            for sample in batch:
+                R_err = sample["_stage_benchmark"]["pose_error_rotation"]
+                t_err = sample["_stage_benchmark"]["pose_error_translation"]
+                data["3pt_R_err"].append(R_err["3pt_up"])
+                data["5pt_R_err"].append(R_err["5pt"])
+                data["3pt_t_err"].append(t_err["3pt_up"])
+                data["5pt_t_err"].append(t_err["5pt"])
+        
+        output_stats_filename = f"{get_timestamp_str()}_run_stats.csv"
+        
+        
+        filled_columns = [c for c in columns if len(data[c]) > 0]
+        data_arr = [np.expand_dims(np.array(data[c]), axis=1) 
+                    for c in filled_columns]
+        data_arr = np.concatenate(data_arr, axis=1)
+        
+        df = pd.DataFrame(data_arr, columns=filled_columns)
+        
+        df.to_csv(output_stats_filename, index=False)
+        
+        
 
 
 def extract_relevant_info(running_output):
-    return running_output  #TODO
+    return running_output
 
 
 
