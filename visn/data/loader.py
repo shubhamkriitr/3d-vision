@@ -11,7 +11,8 @@ from typing import Dict, List
 from collections import defaultdict
 from visn.config import read_config
 # TODO: Also see: https://pytorch.org/docs/stable/data.html
-
+# TODO: move to constants
+DIR_MATCHED_KEY_POINTS = "matched_keypoints"
 class BaseDataLoader(object):
     def __init__(self, *args, **kwargs) -> None:
         # specific initialization to be handeled in 
@@ -81,7 +82,12 @@ class BaseDataset:
     """
     def __init__(self, image_extension: str = IMG_EXT_PNG, config: Dict = {}, **kwargs) -> None:
         self.image_extension = image_extension
-        self.same_intrinsic_matrix_for_all = True
+        self.same_intrinsic_matrix_for_all = False
+        if not self.same_intrinsic_matrix_for_all:
+            logger.warning(f"Note:  K matrix file for each image is required"
+                           f"separately. Set `same_intrinsic_matrix_for_all`")
+        
+        self.keypoint_matches_available = False
         self._init_from_config(config)
 
         # load relevant data
@@ -97,6 +103,11 @@ class BaseDataset:
         if "same_intrinsic_matrix_for_all" in self.config:
             self.same_intrinsic_matrix_for_all \
                 = self.config["same_intrinsic_matrix_for_all"]
+        
+        if DIR_MATCHED_KEY_POINTS in os.listdir(self.data_root_dir):
+            logger.info(f"Keypoint matches are also available")
+            self.keypoint_matches_available = True
+            
 
     def _get_calibration(self) -> Dict[str, List]:
         # define required paths
@@ -208,7 +219,27 @@ class BaseDataset:
     
     def __len__(self):
         return len(self.ids)
+    
+    def get_keypoint_matches(self, group):
+        """ 
+        call it iff `self.keypoint_matches_available`
+        """
+        if len(group) != 2:
+            logger.warning(f"`group` is expected to contain only 2 elements "
+                        f" but got {len(group)}. Only first two will be used")
+        
+        id_1, id_2 = group[0], group[1]
+        
+        filename = f"kp_matches_{id_1}_{id_2}.txt"
+        
+        kp_match_path = os.path.join(self.data_root_dir,
+                                            DIR_MATCHED_KEY_POINTS,
+                                            filename)
+        
+        kp_1_kp_2 = np.loadtxt(kp_match_path) # first two columns
+        # are for kp1 and the next two for kp_2
 
+        return [kp_1_kp_2[:, 0:2], kp_1_kp_2[:, 2:4]]
 
 class GroupedImagesDataset(BaseDataset):
     """Image pair data set. Loads individual images and K matrices as array
@@ -252,6 +283,12 @@ class GroupedImagesDataset(BaseDataset):
                "input_gravity_pred": gr_pred_,
                "input_gravity": gr_,
                "K": k_}
+        
+        
+        if self.keypoint_matches_available:
+            kp_matches = self.get_keypoint_matches(group)
+            out["input_keypoint_matches"] = kp_matches
+        
         return out
 
         

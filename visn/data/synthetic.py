@@ -132,6 +132,7 @@ class CameraPairDataGeneratorUpright3Pt(CameraPairDataGenerator):
         return rotation
 
 
+# TODO: Move to constants
 DIR_CALIBRATION = "calibration"
 DIR_GRAVITY_GT = "gravity_gt"
 DIR_GRAVITY_PRED = "gravity_pred"
