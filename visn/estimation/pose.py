@@ -14,15 +14,15 @@ default_ransac_options = poselib.RansacOptions()
 default_bundle_options = poselib.BundleOptions()
 
 DEFAULT_POSELIB_BUNDLE_OPTIONS = {
-    'max_iterations': 100, 'loss_scale': 1.0, 'loss_type': 'CAUCHY',
+    'max_iterations': 0, 'loss_scale': 1.0, 'loss_type': 'CAUCHY',
     'gradient_tol': 1e-10, 'step_tol': 1e-08, 'initial_lambda': 0.001,
     'min_lambda': 1e-10, 'max_lambda': 10000000000.0, 'verbose': False}
 
 
 DEFAULT_POSELIB_RANSAC_OPTIONS = {
-    'max_iterations': 100000, 'min_iterations': 1000,
-    'dyn_num_trials_mult': 3.0, 'success_prob': 0.9999,
-    'max_reproj_error': 12.0, 'max_epipolar_error': 1.0,
+    'max_iterations': 100000, 'min_iterations': 2,
+    'dyn_num_trials_mult': 3.0, 'success_prob': 0.95,
+    'max_reproj_error': 12.0, 'max_epipolar_error': 1e-2,
     'seed': 0, 'progressive_sampling': False,
     'max_prosac_iterations': 100000}
     
