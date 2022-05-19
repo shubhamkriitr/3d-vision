@@ -55,9 +55,13 @@ class BasePreprocessor(object):
     def process_one_sample(self, sample):
         k_inverse = [np.linalg.inv(k) for k in sample["K"]]
         input_images = sample["input_images"]
-            
-        keypoints_0, keypoints_1 = self.kpm.get_matches(
-                input_images[0], input_images[1], self.keypoint_threshold)
+        
+        if "input_keypoint_matches" not in sample:
+            keypoints_0, keypoints_1 = self.kpm.get_matches(
+                    input_images[0], input_images[1], self.keypoint_threshold)
+        else:
+            logger.info("Using keypoint matches from dataset.")
+            keypoints_0, keypoints_1 = sample["input_keypoint_matches"]
             
         normalized_keypoints = self.normalized_keypoints(k_inverse,
                                     [keypoints_0, keypoints_1])
@@ -435,7 +439,7 @@ class BenchmarkingProcessor(BasePreprocessor):
                      poselib.estimate_relative_pose],
             args_kwargs=[args_kwargs_for_3pt_up, args_kwargs_for_5pt],
             use_same_args_kwargs_for_all=False,
-            num_trials=20, # FIXME
+            num_trials=1, # FIXME
             normalization_mode=None
         )
         
