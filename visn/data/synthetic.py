@@ -154,8 +154,67 @@ class SyntheticVisnDataGenerator(object):
     def __init__(self) -> None:
         pass
     
-    def generate(num_pairs, output_dir, *args, **kwargs):
-        pass
+    def generate(self, num_pairs, output_dir, *args, **kwargs):
+        self.init_visn_folder_structure(output_dir)
+        
+        K0, K1, Rt0, Rt1, world_points = self.get_seed_pair_data()
+        
+    
+    
+    def to_homogeneous(self, x):
+        return
+    
+    def to_non_homogeneous(self, x):
+        return
+        
+
+    def get_seed_pair_data(self):
+        K0 = np.array(
+            [
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1]
+            ]
+        )
+        K1 = np.array(
+            [
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1]
+            ]
+        )
+        
+        R0 = Rotation.from_euler("zyx", [0, 0 , 0], degrees=True).as_matrix()
+        R1 = Rotation.from_euler("zyx", [0, 0 , 30], degrees=True).as_matrix()
+        
+        c0 =  np.array([[10], [5], [1]], dtype=np.float64)
+        c1 =  np.array([[20], [10], [1]], dtype=np.float64)
+        
+        t0 = - R0 @ c0
+        t1 = - R1 @ c1
+        
+        Rt0 = np.concatenate([R0, t0], axis=1)
+        Rt1 = np.concatenate([R1, t1], axis=1)
+        
+        
+        world_points = np.array(
+            [10, 30, 10],
+            [10, 40, 10],
+            [20, 20, 15],
+            [20, 30, 15],
+            [15, 12, 20],
+            [15, 0, 20],
+            [15, 15, 25],
+            [15, 25, 25],
+            [0, 30, 30],
+            [30, 0, 30],
+            [35, 35, 35],
+            [40, 35, 35], dtype=np.float64)
+        
+        
+        
+        return K0, K1, Rt0, Rt1, world_points
+        
     
     def save_single_image_data(self, sr_num,
                                image_id, dtu_scan_dir, target_dir):
