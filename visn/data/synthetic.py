@@ -221,6 +221,8 @@ class SyntheticVisnDataGenerator(object):
         xW_hom = self.to_homogeneous(xW)
         x_hom = K @ Rt @ xW_hom.T # 3 x 4  x   4 x N
         x_hom = x_hom.T # N x 3
+        if np.any(x_hom[:, 2] < 0):
+            logger.warning(f"Some points are not in front of the camera")
         x = self.to_non_homogeneous(x_hom)
         return x
     
@@ -259,11 +261,11 @@ class SyntheticVisnDataGenerator(object):
             ]
         )
         
-        R0 = Rotation.from_euler("zyx", [0, 0 , 0], degrees=True).as_matrix()
-        R1 = Rotation.from_euler("zyx", [0, 0 , 3], degrees=True).as_matrix()
+        R0 = Rotation.from_euler("zyx", [90, 5 , 5], degrees=True).as_matrix()
+        R1 = Rotation.from_euler("zyx", [20, 10 , 10], degrees=True).as_matrix()
         
         c0 =  np.array([[10], [5], [1]], dtype=np.float64)
-        c1 =  np.array([[20], [10], [1]], dtype=np.float64)
+        c1 =  np.array([[20], [10], [5]], dtype=np.float64)
         
         t0 = - R0 @ c0
         t1 = - R1 @ c1
@@ -301,12 +303,12 @@ class SyntheticVisnDataGenerator(object):
         
         x_range = [0, 50]
         y_range = [0, 100]
-        z_range = [30, 200]
+        z_range = [100, 200]
         
         logger.info(f"Not using hard coded data for now. "
                     f"Using random data points from"
                     f" this grid -> x: {x_range} , y: {y_range}, z: {z_range}"
-                    f" To use static data set `static` arg")
+                    f" To use static data; set `static` arg")
         world_points = self.get_random_world_points_from_grid(
             n_samples=250, x_range=x_range, y_range=y_range, z_range=z_range
         )
