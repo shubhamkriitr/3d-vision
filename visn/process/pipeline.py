@@ -6,12 +6,13 @@ from visn.config import read_config
 from typing import Dict
 import pandas as pd
 import numpy as np
-
+import os
 
 class BasePipeline:
     def __init__(self, config: Dict = {}, **kwargs) -> None:
         self._init_from_config(config)
         self.setup_pipeline_steps()
+        self.output_dir = "pipeline_outputs" # TODO: read from config
 
     def _init_from_config(self, config):
         # update config with default configuration
@@ -110,7 +111,10 @@ class BasePipeline:
         
         df = pd.DataFrame(data_arr, columns=filled_columns)
         
-        df.to_csv(output_stats_filename, index=False)
+        
+        os.makedirs(self.output_dir, exist_ok=True)
+        df.to_csv(os.path.join(self.output_dir, output_stats_filename),
+                  index=True)
         
         
 
