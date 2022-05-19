@@ -4,6 +4,7 @@ import os
 import shutil
 import matplotlib
 import imageio
+from visn.utils import logger
 class SyntheticDataGenerator(object):
     def __init__(self) -> None:
         pass
@@ -157,11 +158,12 @@ class SyntheticVisnDataGenerator(object):
     def __init__(self) -> None:
         pass
     
-    def generate(self, num_pairs, output_dir,  *args, **kwargs):
+    def generate(self, num_pairs, output_dir, static=False,
+                 *args, **kwargs):
         self.init_visn_folder_structure(output_dir)
         
         assert num_pairs == 1, "currently only single pair (1) is supported"
-        K0, K1, Rt0, Rt1, world_points = self.get_seed_pair_data()
+        K0, K1, Rt0, Rt1, world_points = self.get_seed_pair_data(static=static)
         
         kp_1 = self.transform_world_points_to_img(world_points, K0, Rt0)
         kp_2 = self.transform_world_points_to_img(world_points, K1, Rt1)
@@ -241,24 +243,24 @@ class SyntheticVisnDataGenerator(object):
         return x_non_hom
         
 
-    def get_seed_pair_data(self):
+    def get_seed_pair_data(self, static=True):
         K0 = np.array(
             [
-                [1, 0, 0],
-                [0, 1, 0],
+                [100, 0, 5],
+                [0, 100, 5],
                 [0, 0, 1]
             ]
         )
         K1 = np.array(
             [
-                [100, 0, 0],
-                [0, 100, 0],
+                [100, 0, 10],
+                [0, 100, 10],
                 [0, 0, 1]
             ]
         )
         
         R0 = Rotation.from_euler("zyx", [0, 0 , 0], degrees=True).as_matrix()
-        R1 = Rotation.from_euler("zyx", [0, 0 , 30], degrees=True).as_matrix()
+        R1 = Rotation.from_euler("zyx", [0, 0 , 3], degrees=True).as_matrix()
         
         c0 =  np.array([[10], [5], [1]], dtype=np.float64)
         c1 =  np.array([[20], [10], [1]], dtype=np.float64)
@@ -268,6 +270,8 @@ class SyntheticVisnDataGenerator(object):
         
         Rt0 = np.concatenate([R0, t0], axis=1)
         Rt1 = np.concatenate([R1, t1], axis=1)
+        
+        
         
         
         world_points = np.array(
@@ -282,11 +286,46 @@ class SyntheticVisnDataGenerator(object):
             [0, 30, 30],
             [30, 0, 30],
             [35, 35, 35],
-            [40, 35, 35]], dtype=np.float64)
+            [40, 35, 35],
+            [12, 10, 80],
+            [12, 15, 80],
+            [12, 19, 80],
+            [19, 19, 80],
+            [19, 19, 90],
+            [19, 19, 95],
+            [100, 100, 100]], dtype=np.float64)
+        
+        if static:
+            return K0, K1, Rt0, Rt1, world_points
+        
+        
+        x_range = [0, 50]
+        y_range = [0, 100]
+        z_range = [30, 200]
+        
+        logger.info(f"Not using hard coded data for now. "
+                    f"Using random data points from"
+                    f" this grid -> x: {x_range} , y: {y_range}, z: {z_range}"
+                    f" To use static data set `static` arg")
+        world_points = self.get_random_world_points_from_grid(
+            n_samples=250, x_range=x_range, y_range=y_range, z_range=z_range
+        )
         
         
         
         return K0, K1, Rt0, Rt1, world_points
+    
+    def get_random_world_points_from_grid(self, n_samples,
+                                        x_range, y_range, z_range):
+        size = (n_samples, 1)
+        x = np.random.uniform(low=x_range[0], high=x_range[1], size=size)
+        y = np.random.uniform(low=y_range[0], high=y_range[1], size=size)
+        z = np.random.uniform(low=z_range[0], high=z_range[1], size=size)
+        
+        world_points = np.concatenate([x, y, z], axis=1)
+        
+        return world_points
+        
     
         
     
@@ -358,7 +397,7 @@ if __name__ == "__main__":
     # datagen = CameraPairDataGenerator()
     # datagen.get_all()
     datagen = SyntheticVisnDataGenerator()
-    datagen.generate(1, "__temp__/synthetic_data")
+    datagen.generate(1, "__temp__/synthetic_data", static=False)
     
     
     
