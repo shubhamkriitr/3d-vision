@@ -37,7 +37,7 @@ class BasePipeline:
             self.benchmarking_processor.process
         ]
         self.steps_after_end = [
-            self.print_full_summary
+            self.save_summary_csv
         ]
         
         
@@ -57,7 +57,7 @@ class BasePipeline:
             
         return outputs
     
-    def print_full_summary(self, *args, **kwargs):
+    def save_summary_csv(self, *args, **kwargs):
         outputs = args[0]
         
         error_summary = []
@@ -68,7 +68,7 @@ class BasePipeline:
             'model_score'
         ]
         
-        solver_types = ["3pt",  "5pt"]
+        solver_types = ["3pt_up",  "5pt"]
         columns = []
         for s in solver_types:
             for i in item_names:
@@ -82,10 +82,23 @@ class BasePipeline:
             for sample in batch:
                 R_err = sample["_stage_benchmark"]["pose_error_rotation"]
                 t_err = sample["_stage_benchmark"]["pose_error_translation"]
-                data["3pt_R_err"].append(R_err["3pt_up"])
+                data["3pt_up_R_err"].append(R_err["3pt_up"])
                 data["5pt_R_err"].append(R_err["5pt"])
-                data["3pt_t_err"].append(t_err["3pt_up"])
+                data["3pt_up_t_err"].append(t_err["3pt_up"])
                 data["5pt_t_err"].append(t_err["5pt"])
+                for s in ["3pt_up", "5pt"]:
+                    d = sample["_stage_pose_estimate"]["ransac_options"]
+                    for k in ["min_iterations", "max_epipolar_error", 
+                            "success_prob"]:
+                    
+                        data[f"{s}_{k}"].append(d[s][k])
+                for s in ["3pt_up", "5pt"]:
+                    d = sample['_stage_pose_estimate']['solution_metadata']
+                    for k in ['refinements', 'iterations', 'num_inliers', 
+                              'inlier_ratio', 'model_score']:
+                    
+                        data[f"{s}_{k}"].append(d[s][k])
+                
         
         output_stats_filename = f"{get_timestamp_str()}_run_stats.csv"
         
