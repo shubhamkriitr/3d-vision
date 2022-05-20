@@ -3,7 +3,7 @@
     "object": "GroupedImagesDataset",
     "resource_scene": "easy_scenes/scene0025_01",
     "same_intrinsic_matrix_for_all": true,
-    "use_prediction": true
+    "use_prediction": false
   },
   "dataloader": {
     "object": "SequentialDataLoader",

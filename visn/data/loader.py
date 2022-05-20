@@ -170,6 +170,7 @@ class BaseDataset:
         files = os.listdir(images_dir_path)
         ids = [name.split(".")[0] for name in files
                      if name.endswith(self.image_extension)]
+        ids.sort()
         return ids
 
     def get_id(self, index: int) -> str:

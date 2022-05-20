@@ -7,6 +7,7 @@ from typing import Dict
 import pandas as pd
 import numpy as np
 import os
+from visn.process.utils import compute_relative_pose
 
 class BasePipeline:
     def __init__(self, config: Dict = {}, **kwargs) -> None:
@@ -32,7 +33,7 @@ class BasePipeline:
             
         # ]
         self.steps = [
-            # AdHocTransforms().process,
+            AdHocTransforms().process,
             self.preprocessor.process,
             self.pose_estimation_processor.process,
             self.benchmarking_processor.process
@@ -133,44 +134,20 @@ class AdHocTransforms(BasePreprocessor):
         pass
         
     def process_one_sample(self, sample):
-        x = 1
-        y = x +1
-        import numpy as np
-        from copy import deepcopy
-        common_chosen_axis = np.array([[0], [0], [-1]], dtype=np.float64)
-        
-        
-        Rt0, Rt1 = sample['input_relative_poses']
-        R0, t0 = Rt0[:, 0:3], Rt0[:, 3:4]
-        R1, t1 = Rt1[:, 0:3], Rt1[:, 3:4]
-        
-        g0 = R0 @ common_chosen_axis
-        g1 = R1 @ common_chosen_axis
-        
-        g0 = g0 / np.linalg.norm(g0)
-        g1 = g1 / np.linalg.norm(g1)
-        
-        g0 = np.ravel(g0)
-        g1 = np.ravel(g1)
-        
-        logger.warning(f"Overriding input_gravity")
-        
-        sample['input_gravity'] = [g0, g1]
-        sample['input_roll_pitch_gt'] = deepcopy(sample['input_gravity'])
-        sample['input_gravity_gt'] = deepcopy(sample['input_gravity'])
-        
-        # slightly rotate the second image to test the effect
-        from scipy.spatial.transform import Rotation
-        Rdelta = Rotation.from_euler("zyx", [10, 0, 0], degrees=True)
-        
-        R1_new = Rdelta.as_matrix()@R1
-        
-        Rt1 = np.concatenate([R1_new, t1], axis=1)
-        sample['input_relative_poses'][1] = Rt1
-        
-        
-        
-    def compute_dummy_gravity_vector_from_rotation_matrices(self):
+        Rel_0, Rel_1 = sample['input_relative_poses']
+        Rel_0, Rel_1 = np.array(Rel_0), np.array(Rel_1)
+        Cw_0, Cw_1 = Rel_0[:, 0:3], Rel_1[:, 0:3]
+        Tw_0, Tw_1 = Rel_0[:, 3:4], Rel_1[:, 3:4]
+        R_0, R_1 = Cw_0.T, Cw_1.T
+        t_0, t_1 = - R_0 @ Tw_0, - R_1 @ Tw_1
+
+        Rt_0, Rt_1 = np.hstack((R_0, t_0)), np.hstack((R_1, t_1))
+
+        sample['input_relative_poses'] = [Rt_0.tolist(), Rt_1.tolist()]
+        sample["relative_pose_0_1_gt"] = compute_relative_pose(Rt_0, Rt_1)
+
+
+def compute_dummy_gravity_vector_from_rotation_matrices(self):
         pass
         
         
