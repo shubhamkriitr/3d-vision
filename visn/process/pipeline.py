@@ -77,6 +77,7 @@ class BasePipeline:
         for s in solver_types:
             for i in item_names:
                 columns.append(s+"_"+i)
+        columns.append("input_gravity_err")
         
         data = {
             c: [] for c in columns
@@ -102,6 +103,8 @@ class BasePipeline:
                               'inlier_ratio', 'model_score']:
                     
                         data[f"{s}_{k}"].append(d[s][k])
+                if "_stage_angle_manipulator" in sample:
+                    data["input_gravity_err"].append(sample["_stage_angle_manipulator"]["input_gravity_err"])
                 
         
         output_stats_filename = f"{get_timestamp_str()}_run_stats.csv"

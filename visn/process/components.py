@@ -572,13 +572,13 @@ class AngleManipulatorProcessor(BasePreprocessor):
             if self.pipeline_stage not in new_s:
                 new_s[self.pipeline_stage] = {}
             _stage_data = new_s[self.pipeline_stage]
-            _stage_data["angle_error"] = angl
+            _stage_data["input_gravity_err"] = angl
 
             # if angle is minus dont change the gravity input
             if angl<0 :
                 new_samples.append(new_s)
                 continue
-            
+
             # if angle not minus
             for i in range(len(new_s['input_gravity'])):
                 new_s["input_gravity"][i] = self._interpolate_angle(
