@@ -278,7 +278,8 @@ class GroupedImagesDataset(BaseDataset):
         gr_ = copy.deepcopy(gr_pred_) if self.use_prediction else copy.deepcopy(gr_gt_)
 
         # structure output
-        out = {"input_images": img_,
+        out = {"input_group": group,
+               "input_images": img_,
                "input_relative_poses": rel_pos_,
                "input_roll_pitch_gt": rp_gt_,
                "input_roll_pitch_pred": rp_pred_,
