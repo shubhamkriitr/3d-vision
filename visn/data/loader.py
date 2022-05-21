@@ -10,6 +10,7 @@ import numpy as np
 from typing import Dict, List
 from collections import defaultdict
 from visn.config import read_config
+import copy
 # TODO: Also see: https://pytorch.org/docs/stable/data.html
 # TODO: move to constants
 DIR_MATCHED_KEY_POINTS = "matched_keypoints"
@@ -274,7 +275,7 @@ class GroupedImagesDataset(BaseDataset):
             gr_gt_.append(gr_gt)
             gr_pred_.append(gr_pred)
             k_.append(self.get_calibration(id_)["K"])
-        gr_ = gr_pred_ if self.use_prediction else gr_gt_
+        gr_ = copy.deepcopy(gr_pred_) if self.use_prediction else copy.deepcopy(gr_gt_)
 
         # structure output
         out = {"input_images": img_,
@@ -284,7 +285,8 @@ class GroupedImagesDataset(BaseDataset):
                "input_gravity_gt": gr_gt_,
                "input_gravity_pred": gr_pred_,
                "input_gravity": gr_,
-               "K": k_}
+               "K": k_,
+               "use_gravity_pred":self.use_prediction}
         
         
         if self.keypoint_matches_available:

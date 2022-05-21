@@ -7,7 +7,7 @@
   },
   "dataloader": {
     "object": "SequentialDataLoader",
-    "batch_size": 1
+    "batch_size": 2
   },
   "preprocessor": {
     "object": "BasePreprocessor",
@@ -15,6 +15,11 @@
     "keypoint_matcher": "OpenCvKeypointMatcher",
     "gravity_estimator": "BaseGravityEstimator",
     "keypoint_threshold": 0.75
+  },
+  "angle_manipulator":{
+    "object": "AngleManipulatorPreprocessor",
+    "run_process": true,
+    "target_angles": [-1,0,5]
   },
   "pose_estimator": {
     "object": "PoseEstimationProcessor",

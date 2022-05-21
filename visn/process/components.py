@@ -1,3 +1,4 @@
+from anyio import run_process
 from visn.estimation.keypoint import OpenCvKeypointMatcher
 import numpy as np
 from typing import List
@@ -11,6 +12,7 @@ from visn.process.utils import compute_alignment, compute_relative_pose
 import poselib
 from typing import Dict
 from visn.config import read_config
+import copy
 # TODO : move key-names used in sample/stage data to constants 
 
 class BasePreprocessor(object):
@@ -463,7 +465,11 @@ class BenchmarkingProcessor(BasePreprocessor):
         }
         
         self.log_pose_errors(sample, sample[self.pipeline_stage])
-        logger.info(f"{self.pipeline_stage} : {sample[self.pipeline_stage]}")
+        if ("_stage_angle_manipulator" not in sample):
+            logger.info(f"{self.pipeline_stage} : {sample[self.pipeline_stage]}")
+        else :
+            angl_err = sample["_stage_angle_manipulator"]
+            logger.info(f"{self.pipeline_stage} : {sample[self.pipeline_stage]} {angl_err}")
         return sample
     
     def log_pose_errors(self, sample, _stage_data: dict):
@@ -529,7 +535,97 @@ class BenchmarkingProcessor(BasePreprocessor):
         }
         
         
+class AngleManipulatorProcessor(BasePreprocessor):
+    
+    def __init__(self, config: Dict = ..., **kwargs) -> None:
+        super().__init__(config, **kwargs)
+        self.target_angles = config["target_angles"]
+        self.run_process = config["run_process"]
+        self.pipeline_stage = "_stage_angle_manipulator"
+    
+    def _init_from_config(self, config):
+        pass
+
+    def process(self, batch_):
+            # Assumes batch_ is a list of dictionaries 
+            # {"input": [img_1, img_2, ...],
+            # "K": [K_0, K_1, ....]}
+            
+            output = []
+            
+            for sample in batch_:
+                new_samples = self.process_one_sample(sample)
+                for s in new_samples:
+                    output.append(s)
+            
+            return output
+
+    def process_one_sample(self, sample):
         
+        new_samples = []
+        if (sample["use_gravity_pred"] == False) or not(self.run_process):
+            new_samples.append(sample)
+            return new_samples
+
+        for angl in (self.target_angles):
+            new_s = copy.deepcopy(sample)
+            if self.pipeline_stage not in new_s:
+                new_s[self.pipeline_stage] = {}
+            _stage_data = new_s[self.pipeline_stage]
+            _stage_data["angle_error"] = angl
+
+            # if angle is minus dont change the gravity input
+            if angl<0 :
+                new_samples.append(new_s)
+                continue
+            
+            # if angle not minus
+            for i in range(len(new_s['input_gravity'])):
+                new_s["input_gravity"][i] = self._interpolate_angle(
+                    new_s['input_gravity_gt'][i],
+                    new_s['input_gravity_pred'][i],
+                    np.pi/180*angl
+                )
+            new_samples.append(new_s)
+            
+        return new_samples
+    
+    def _rotation_matrix_from_vectors(self, vec1, vec2):
+        """ Find the rotation matrix that aligns vec1 to vec2
+        :param vec1: A 3d "source" vector
+        :param vec2: A 3d "destination" vector
+        :return mat: A transform matrix (3x3) which when applied to vec1, aligns it with vec2.
+        """
+        a, b = (vec1 / np.linalg.norm(vec1)).reshape(3), (vec2 / np.linalg.norm(vec2)).reshape(3)
+        v = np.cross(a, b)
+        c = np.dot(a, b)
+        s = np.linalg.norm(v)
+        if s==0:
+            return  np.eye(3)
+        kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+        rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
+        return rotation_matrix
+
+    def _rotation_z_allign(self, vec):
+        return self._rotation_matrix_from_vectors(vec,np.array([0, 0, 1]))
+
+    def _interpolate_angle(self, ref, trg, angle):
+        m_a = np.linalg.norm(ref)
+        m_b = np.linalg.norm(trg)
+        a = (ref / m_a).reshape(3)
+        b = (trg / m_b).reshape(3)
+        v = np.cross(a, b)
+        mat = self._rotation_z_allign(v)
+        r1 = np.array([[np.cos(angle), -np.sin(angle), 0], 
+                    [np.sin(angle),  np.cos(angle), 0], 
+                    [           0,               0, 1]])
+        r2 = np.array([[np.cos(-angle), -np.sin(-angle), 0], 
+                    [np.sin(-angle),  np.cos(-angle), 0], 
+                    [             0,               0, 1]])
+        s1 = ( mat.T @ r1 @ mat @ a.reshape(3,1) ).reshape(3)
+        s2 = ( mat.T @ r2 @ mat @ a.reshape(3,1) ).reshape(3)
+        check = np.dot(s1, b) > np.dot(s2, b)
+        return s1*m_b if check else s2*m_b
         
     
 if __name__ == "__main__":

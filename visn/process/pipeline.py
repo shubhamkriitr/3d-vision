@@ -1,5 +1,5 @@
 from visn.process.components import (BasePreprocessor, PoseEstimationProcessor,
-                          BenchmarkingProcessor)
+                          BenchmarkingProcessor, AngleManipulatorProcessor)
 from visn.data.loader import SequentialDataLoader, GroupedImagesDataset
 from visn.utils import logger, get_timestamp_str
 from visn.config import read_config
@@ -23,6 +23,7 @@ class BasePipeline:
         self.dataset = GroupedImagesDataset(config=self.config["dataset"])
         self.dataloader = SequentialDataLoader(dataset=self.dataset,
                                                config=self.config["dataloader"])
+        self.angle_manipulator_processor = AngleManipulatorProcessor(self.config["angle_manipulator"])
         self.preprocessor = BasePreprocessor(self.config["preprocessor"])
         self.pose_estimation_processor = PoseEstimationProcessor()
         self.benchmarking_processor = BenchmarkingProcessor(pipeline=self)
@@ -34,6 +35,7 @@ class BasePipeline:
         # ]
         self.steps = [
             AdHocTransforms().process,
+            self.angle_manipulator_processor.process,
             self.preprocessor.process,
             self.pose_estimation_processor.process,
             self.benchmarking_processor.process
