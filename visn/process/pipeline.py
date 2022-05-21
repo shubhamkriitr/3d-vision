@@ -74,10 +74,13 @@ class BasePipeline:
         
         solver_types = ["3pt_up",  "5pt"]
         columns = []
+        
+        columns.append("image_pair")
         for s in solver_types:
             for i in item_names:
                 columns.append(s+"_"+i)
         columns.append("input_gravity_err")
+        columns.append("absolute_translation")
         
         data = {
             c: [] for c in columns
@@ -87,6 +90,8 @@ class BasePipeline:
             for sample in batch:
                 R_err = sample["_stage_benchmark"]["pose_error_rotation"]
                 t_err = sample["_stage_benchmark"]["pose_error_translation"]
+                input_group = sample["input_group"]
+                data["image_pair"].append(input_group[0] + " " + input_group[1])
                 data["3pt_up_R_err"].append(R_err["3pt_up"])
                 data["5pt_R_err"].append(R_err["5pt"])
                 data["3pt_up_t_err"].append(t_err["3pt_up"])
@@ -106,7 +111,7 @@ class BasePipeline:
                 if "_stage_angle_manipulator" in sample:
                     data["input_gravity_err"].append(sample["_stage_angle_manipulator"]["input_gravity_err"])
                 
-        
+                data["absolute_translation"].append(sample["absolute_translation"])
         output_stats_filename = f"{get_timestamp_str()}_run_stats.csv"
         
         

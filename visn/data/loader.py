@@ -276,7 +276,6 @@ class GroupedImagesDataset(BaseDataset):
             gr_pred_.append(gr_pred)
             k_.append(self.get_calibration(id_)["K"])
         gr_ = copy.deepcopy(gr_pred_) if self.use_prediction else copy.deepcopy(gr_gt_)
-
         # structure output
         out = {"input_group": group,
                "input_images": img_,
@@ -287,7 +286,10 @@ class GroupedImagesDataset(BaseDataset):
                "input_gravity_pred": gr_pred_,
                "input_gravity": gr_,
                "K": k_,
-               "use_gravity_pred":self.use_prediction}
+               "use_gravity_pred":self.use_prediction,
+               "absolute_translation": np.sqrt((rel_pos_[0][0][3]-rel_pos_[1][0][3])**2 + 
+                                               (rel_pos_[0][1][3]-rel_pos_[1][1][3])**2 +
+                                               (rel_pos_[0][2][3]-rel_pos_[1][2][3])**2) }
         
         
         if self.keypoint_matches_available:
