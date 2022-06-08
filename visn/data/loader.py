@@ -207,7 +207,7 @@ class BaseDataset:
             gravity_file_path = os.path.join(self.data_root_dir, "gravity_pred", f"{id_}.txt")
         
         rel_pose_xyz = np.loadtxt(gravity_file_path)
-        rel_pose_yzx = [rel_pose_xyz[1], rel_pose_xyz[2], rel_pose_xyz[0]]
+        rel_pose_yzx = [-rel_pose_xyz[1], rel_pose_xyz[2], rel_pose_xyz[0]]
         return rel_pose_yzx
 
     def __getitem__(self, id_: str):
