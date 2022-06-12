@@ -124,23 +124,35 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 
 ### Preparing the execution environment
 - Go to the `3d-vision` (TODO-name it correctly) directory
-- Execute the following in sequence (enter yes when prompted):
-```
-conda create -n 3dvis-py3-9-5 python==3.9.5
-conda activate 3dvis-py3-9-5
-pip install -r requirements.txt
-```
-- Now the environment should be ready
-- Make sure to check that the environment is activated before running the code
-stt
-#### Install the generated wheel file
 
-- Run the following
-```sh
+- Install the requirements in your `python 3.9.5` environment
+  - `pip install -r requirements.txt`
+- Make sure that `poselib` wheel package generated earlier is also installed in this environment
+
+### Running the pipeline
+- Go to the `3d-vision` folder. There run the command `PYTHONPATH=. python visn/main.py`
+- In summary, it does the following
+  - loads the dataset (which contains images, corresponding intrinsic matrices, gravity vectors etc. )
+  - extracts keypoints and find matches
+  - computes relative by running 3-point estimator and using gravity
+  - computes relative pose using 5-point estimator
+  - compares the runtimes and pose errors for the solutions of both the estimators
+  - generates a `.csv` file containing metrics like pose error, runtime, inliers and ransac iterations
+
+
+```py
+self.steps = [
+            AdHocTransforms().process,
+            self.angle_manipulator_processor.process,
+            self.preprocessor.process,
+            self.pose_estimation_processor.process,
+            self.benchmarking_processor.process
+        ]
 ```
 
-### Summary of pipeline steps
-- Go to the `threedvis` folder. There run the command `PYTHONPATH=. python visn/main.py`
+
+
+
   - This will run the whole pipeline which has the following steps
     - It will load the data
     - After data loading the keypoints for the image pair is extracted and correspondences are found
