@@ -138,6 +138,8 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
   - computes relative pose using 5-point estimator
   - compares the runtimes and pose errors for the solutions of both the estimators
   - generates a `.csv` file containing metrics like pose error, runtime, inliers and ransac iterations
+    - the output will be saved in a timestamped file in `pipeline_outputs` directory
+    - _e.g._ `pipeline_outputs/2022-06-12_201720__run_stats.csv`
 
 
 > Following are the details of the steps involved
