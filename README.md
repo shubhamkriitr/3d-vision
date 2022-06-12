@@ -49,10 +49,7 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 > Steps to build
 
 - Go inside `poselib-3dv` directory
-- Extract `eigen-3.4.0.zip` to the `PoseLib` folder (Note: `eigen-3.4.0.zip` was downloaded from https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip )
-- Go inside `PoseLib/eigen-3.4.0` folder and run the commands below
-  - `mkdir build && cd build && cmake ..`
-- Now go back to `PoseLib` folder
+- Extract `eigen-3.4.0.zip` to the current folder (Note: `eigen-3.4.0.zip` was downloaded from https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip )
 - Make sure your default python version is `3.9.5`
   - Install `pybind11` in your python environment
     - `pip install pybind11`
@@ -66,6 +63,12 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
     cmake --build _build/ --target pip-package
     cmake --build _build/ --target install-pip-package
     ```
+  - If all the above steps succeed, the python `poselib` package will be generated at the following location
+    - `_build/pybind/pip_package/`
+    - _e.g._ `_build/pybind/pip_package/poselib-2.0.0-cp39-cp39-linux_x86_64.whl`
+  - The generated package should automatically be installed in the active python environment
+  - To manually install the generated wheel to your target python environment
+    - run _e.g._ `pip install _build/pybind/pip_package/poselib-2.0.0-cp39-cp39-linux_x86_64.whl`
 
 
 
@@ -73,6 +76,7 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 ---
 ## Running UprightNet
 
+- Download the pretrained weights from [here](https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing): https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing
 ### Predicting Gravity
 
 ### Processing Scannet Data
