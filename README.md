@@ -13,7 +13,7 @@ We have tested our code in an environment with the following specifications:
         - `x86_64 ` 
     - RAM: 16 GB
 - OS: `Ubuntu 20.04.4 LTS`
-- Python Version: `3.7.11`
+- Python Version: `3.9.5`
 
 Besides this, UprightNet model training was done on a node with GPU (`NVIDIATITANRTX`).
 
@@ -38,14 +38,24 @@ The following is a quick overview of the steps to reproduce the results. Please 
   - (TODO)
 - Executing the pipeline
   - `visn/main.py` is the entry point for running the pipeline
-### Code Structure
+### Directory Structure
 
 
 ---
 ## Building Poselib Python Library
 
-We have added a 3-point estimator to the existing PoseLib library (`TODO:Path`).
-The final wheel file will be generated once you executre the following steps. (However we have also attached the final wheel file `TODO:whl file path` so you can quickstart by skipping the following build steps)
+We have added a 3-point estimator class to the existing PoseLib library, which is essentially a class that combines already implemented 3-point solver, RANSAC and bundle adjustment. The final wheel file will be generated once you execute the following steps. (However we have also attached the final wheel file `TODO:whl file path` so you can quickstart by skipping the following build steps)
+
+> Steps to build
+
+- Download Eigen
+https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip 
+Pull PoseLib
+git clone https://github.com/vlarsson/PoseLib.git
+- Extract `eigen-3.4.0.zip` to `PoseLib` folder (Note: `eigen-3.4.0.zip` was downloaded from nhttps://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip )
+- Go inside `PoseLib/eigen-3.4.0` folder and run the commands below
+  - `mkdir build && cd build`
+  - `cmake ..`
 
 
 
