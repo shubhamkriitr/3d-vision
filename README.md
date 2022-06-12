@@ -129,7 +129,7 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
   - `pip install -r requirements.txt`
 - Make sure that `poselib` wheel package generated earlier is also installed in this environment
 
-### Running the pipeline
+### Running the pipeline (to compare 3-point with 5-point estimator)
 - Go to the `3d-vision` folder. There run the command `PYTHONPATH=. python visn/main.py`
 - In summary, it does the following
   - loads the dataset (which contains images, corresponding intrinsic matrices, gravity vectors, ground truth relative pose etc. )
@@ -147,6 +147,17 @@ __Data loading__
 
 - `GroupedImagesDataset` from ``visn/data/loader.py`` is the dataset class 
 - and `SequentialDataLoader` is the loader used to feed the data batches to the pipeline
+- By default dataset from `resources/easy_scenes/scene0025_01` will be loaded.
+- To switch dataset folder change `resource_scene` attribute in `visn/config/config.json`
+  - snippet from `visn/config/config.json`
+    ```json
+    "dataset": {
+        "object": "GroupedImagesDataset",
+        "resource_scene": "easy_scenes/scene0025_01",
+        "same_intrinsic_matrix_for_all": true,
+        "use_prediction": true
+      }
+    ```
 
 __Pipeline__
 
@@ -170,7 +181,7 @@ __Ad hoc transforms__
 
 __Angle manipulation__
 
-- (TODO)
+- (TODO @Yoga)
 
 __Preprocessing__
 
@@ -204,8 +215,9 @@ __Summary__
 - It is defined in `BasePipeline.save_summary_csv` (in `visn/process/pipeline.py`)
 
 
-### Interpreting the results
+__Interpreting the results__
 
+(TODO @Timo)
 
 ---
 
