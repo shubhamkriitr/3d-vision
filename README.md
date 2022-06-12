@@ -13,7 +13,7 @@ We have tested our code in an environment with the following specifications:
         - `x86_64 ` 
     - RAM: 16 GB
 - OS: `Ubuntu 20.04.4 LTS`
-- Python Version: `3.7.11`
+- Python Version: `3.9.5`
 
 Besides this, UprightNet model training was done on a node with GPU (`NVIDIATITANRTX`).
 
@@ -38,20 +38,45 @@ The following is a quick overview of the steps to reproduce the results. Please 
   - (TODO)
 - Executing the pipeline
   - `visn/main.py` is the entry point for running the pipeline
-### Code Structure
+### Directory Structure
 
-
+(TODO)
 ---
 ## Building Poselib Python Library
 
-We have added a 3-point estimator to the existing PoseLib library (`TODO:Path`).
-The final wheel file will be generated once you executre the following steps. (However we have also attached the final wheel file `TODO:whl file path` so you can quickstart by skipping the following build steps)
+We have added a 3-point estimator class to the existing PoseLib library, which is essentially a class that combines already implemented 3-point solver, RANSAC and bundle adjustment. The final wheel file will be generated once you execute the following steps. (However we have also attached the final wheel file located at `artifacts/poselib-2.0.0-cp39-cp39-linux_x86_64.whl` so you can quickstart by skipping the following build steps)
+
+> Steps to build
+
+- Go inside `poselib-3dv` directory
+- Extract `eigen-3.4.0.zip` to the current folder (Note: `eigen-3.4.0.zip` was downloaded from https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip )
+- Make sure your default python version is `3.9.5`
+  - Install `pybind11` in your python environment
+    - `pip install pybind11`
+- Copy the `Eigen` folder (which is inside extracted `eigen-3.4.0` directory) to `/usr/local/include/`
+  - `sudo cp -r eigen-3.4.0/Eigen/ /usr/local/include/`
+  - Run the following commands
+    ```sh
+    mkdir _build
+    cmake -S . -B _build/ -DPYTHON_PACKAGE=ON -DWITH_BENCHMARK=ON -DCMAKE_INSTALL_PREFIX=_install
+    cmake --build _build/ --target install -j 8
+    cmake --build _build/ --target pip-package
+    cmake --build _build/ --target install-pip-package
+    ```
+  - If all the above steps succeed, the python `poselib` package will be generated at the following location
+    - `_build/pybind/pip_package/`
+    - _e.g._ `_build/pybind/pip_package/poselib-2.0.0-cp39-cp39-linux_x86_64.whl`
+  - The generated package should automatically be installed in the active python environment
+  - To manually install the generated wheel to your target python environment
+    - run _e.g._ `pip install _build/pybind/pip_package/poselib-2.0.0-cp39-cp39-linux_x86_64.whl`
+
 
 
 
 ---
 ## Running UprightNet
 
+- Download the pretrained weights from [here](https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing): https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing
 ### Predicting Gravity
 
 1. Download and extract from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw:

@@ -1,3 +1,7 @@
+anyio==3.5.0
+numpy==1.22.3
+opencv-python==4.5.5.64
+Pillow==9.1.0
 tox
 pytest
 coverage
