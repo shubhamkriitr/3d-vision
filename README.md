@@ -34,10 +34,10 @@ The following is a quick overview of the steps to reproduce the results. Please 
 - Using UprightNet to get the gravity estimates (TODO)
   - Here we assume UprightNet is already trained (for training steps refer section (TODO))
 - ScanNet data preprocessing
-  - (TODO)
-  - (TODO)
+  - We augment the ScanNet data for our pose estimation evaluation pipeline. The staps to augment the ScanNet data are described in the section "Processing Scannet Data".
 - Executing the pipeline
   - `visn/main.py` is the entry point for running the pipeline
+
 ### Directory Structure
 
 (TODO)
@@ -77,47 +77,37 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 ## Running UprightNet
 
 - Download the pretrained weights from [here](https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing): https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing
-### Predicting Gravity
 
-1. Download and extract from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw:
-	checkpoints.zip (pretrained weights)
-	
-2. Copy checkpoints folder to root directory of UprightNet repo
+- Copy the weights to the folder UprightNet/checkpoints/test_local/
 
-   If your computer does not have an gpu, check out the branch "no-gpu".
+If your computer does not have an gpu, check out the branch "no-gpu".
+
 
 ### Processing Scannet Data
 
-### Predicting Gravity
+1. Download the pretrained weights as described in the section above.
 
-1. Download and extract from https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG?usp=sharing:
-	checkpoints.zip (pretrained weights)
-	
-2. Copy checkpoints folder to root directory of UprightNet repo
-
-   If your computer does not have an gpu, check out the branch "no-gpu".
-
-### Processing Scannet Data
-
-1. Download and extract from https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG?usp=sharing:
-	a) sample_data.zip (for UprightNet preprocessed ScanNet data)
-	b) checkpoints.zip (pretrained weights)
+2. Download and extract from https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG?usp=sharing:
+	  sample_data.zip (for UprightNet preprocessed ScanNet data)
 	
   Alternatively you can use 
-    d) ScanNet.zip and test_scannet_normal_list.txt from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw instead of a), which contains all scenes.
+    ScanNet.zip and test_scannet_normal_list.txt from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw instead of sample_data.zip, which contains all scenes.
 
-2. Adapt the paths of sample_data/test_scannet_normal_list.txt to the path of sample_data (e.g. with find&replace)
+3. Copy the sample_data folder into the root directry of the UprightNet repo (same level as folder checkpoints)
 
-3. Copy checkpoints folder to root directory of UprightNet repo
+4. Adapt DATA_PATH in util/config.py to be the absolute path of the directory where test_scannet_normal_list.txt is located
 
-4. Adapt DATA_PATH in util/config.py to be the directory where test_scannet_normal_list.txt is located
-
-5. To add the predicted gravity vector to the data folders, run
+5. To add the predicted gravity vector to the scene folders, run
 	python3 test.py --mode ResNet --dataset scannet
 	
-	Each scene folder should now contain 4 new folders: pose_pred, pose_gt, gravity_pred, gravity_gt
+	Each scene folder in sample_data/data should now contain 4 new folders: pose_pred, pose_gt, gravity_pred, gravity_gt
 
-	If your computer does not have an gpu, check out the branch "no-gpu".
+6. To get the data structure needed for the pose prediction, adapt in 3d-vision/visn/utils/create_data_folder.py 
+  - the variable "our_data_path" to be the path where the scene data is located (should be sth like .../sample_data/data)
+  - the variable "visn_data_path" to be the folder where the new scene folders should be created
+  - Run "python3 create_data_folder.py"
+
+You should now have the same data as "ready_for_visn.zip" in https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.
 
 ---
 ## Running the pipeline
@@ -219,7 +209,9 @@ __Summary__
 
 __Interpreting the results__
 
-(TODO @Timo)
+- When running the pipeline, a file "pipeline_outputs/..._run_stats.csv" is created.
+- It contains metrics for each image pair: 3pt and 5pt rotation and translation error, the number of iterations, inlier ratio, ...
+- Use the jupyter notebook in "3d-vision/visn/notebooks/Benchmarking.ipynb" to compare 3pt vs. 5pt solver. You need to adapt the relative path and the scenes depending on the files in pipeline_outputs.
 
 ---
 
