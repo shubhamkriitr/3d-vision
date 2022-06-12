@@ -123,7 +123,7 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 ## Running the pipeline
 
 ### Preparing the execution environment
-- Go to the `3d-vision` (TODO-name it correctly) directory
+- Go to the `3d-vision` directory
 
 - Install the requirements in your `python 3.9.5` environment
   - `pip install -r requirements.txt`
