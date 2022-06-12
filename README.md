@@ -48,14 +48,15 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 
 > Steps to build
 
-- Download Eigen
-https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip 
-Pull PoseLib
-git clone https://github.com/vlarsson/PoseLib.git
-- Extract `eigen-3.4.0.zip` to `PoseLib` folder (Note: `eigen-3.4.0.zip` was downloaded from nhttps://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip )
+- Go inside `poselib-3dv` directory
+- Extract `eigen-3.4.0.zip` to the `PoseLib` folder (Note: `eigen-3.4.0.zip` was downloaded from https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip )
 - Go inside `PoseLib/eigen-3.4.0` folder and run the commands below
-  - `mkdir build && cd build`
-  - `cmake ..`
+  - `mkdir build && cd build && cmake ..`
+- Now go back to `PoseLib` folder
+- Make sure your default python version is `3.9.5`
+  - Install `pybind11` in your python environment
+    - `pip install pybind11`
+-  
 
 
 
