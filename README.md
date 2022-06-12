@@ -142,13 +142,13 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 
 > Following are the details of the steps involved
 
-#### Data loading
+__Data loading__
 
 
 - `GroupedImagesDataset` from ``visn/data/loader.py`` is the dataset class 
 - and `SequentialDataLoader` is the loader used to feed the data batches to the pipeline
 
-#### Pipeline
+__Pipeline__
 
 - `BasePipeline` in `visn/process/pipeline.py`, brings all the steps of the pipeline together and provides a shared execution context
 - To initialize it loads its config from `visn/config/config.json`
@@ -164,25 +164,45 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
               self.benchmarking_processor.process
           ]
   ```
-#### Ad hoc transforms
+__Ad hoc transforms__
 
 - To transfrom the ScanNet's axis and realtive pose conventions to the convention assumed in our implementation the data is passed through this step of the pipeline. It's defined in `AdHocTransforms` in `visn/process/pipeline.py`
 
-#### 
+__Angle manipulation__
 
+- (TODO)
 
+__Preprocessing__
 
+- This step is defined in `BasePreprocessor` (from `visn/process/components.py`)
+- It does the following 
+  - normalizes the keypoints using intrisic matrix
+  - finds key point matches with the help of `OpenCvKeypointMatcher`
+  - computes gravity vectors if required
+  - for 3-point based estimation it computes aligned keypoints using gravity information
+  - computes ground truth relative pose from the input ground truth absolute pose
+- Pipeline then passes the input container (with preprocessor's outputs added in it) to the next step
+  
+__Pose estimation processing__
 
+- This step is defined in `PoseEstimationProcessor` (from `visn/process/components.py`)
+- It prepares RANSAC options, bundle options, camera models for both the 3-point and 5-point estimator
+- It feeds the normalized keypoints to  5-point estimator and normalized & aligned keypoints to 3-point estimator, to get the relative pose solutions
+- It removes the effect of alignment from the solution of 3-point estimator
+- Pipeline then passes the input container (with PoseEstimationProcessor's outputs added in it) to the benchmarking step
 
-  - This will run the whole pipeline which has the following steps
-    - It will load the data
-    - After data loading the keypoints for the image pair is extracted and correspondences are found
-    - The for the 3 point estimator - these keypoints are transformed so the gravity vector in these two images moves to the y-axis (which, by the 3 point estimator, is assumed to be the common axis of rotation.)
-    - Then the keypoints are passed to the corrsponding estimators which return the estimated pose
-    - The result of the 3 point estimator is transformed again so as to remove the effect of alignment done earlier
-      - During the execution , their runtimes are also recorde for comparison
-    - Pose error is computed w.r.t. the ground truth pose for both sets of the estimations
-    - These errors , runtimes, and RANSAC parameters are logged into a csv file
+__Benchmarking__
+
+- This is defined in `BenchmarkingProcessor` (from `visn/process/components.py`)
+- It computes pose estimation runtimes (by averaging `20` trials) 
+- It also computes rotation and translation errors for both the estimators
+
+__Summary__
+
+- This step is run only after all the batches have been processed
+- It saves all the metrics recorded during the run in a csv file
+- It is defined in `BasePipeline.save_summary_csv` (in `visn/process/pipeline.py`)
+
 
 ### Interpreting the results
 
