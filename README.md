@@ -132,7 +132,7 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 ### Running the pipeline
 - Go to the `3d-vision` folder. There run the command `PYTHONPATH=. python visn/main.py`
 - In summary, it does the following
-  - loads the dataset (which contains images, corresponding intrinsic matrices, gravity vectors etc. )
+  - loads the dataset (which contains images, corresponding intrinsic matrices, gravity vectors, ground truth relative pose etc. )
   - extracts keypoints and find matches
   - computes relative by running 3-point estimator and using gravity
   - computes relative pose using 5-point estimator
@@ -164,14 +164,12 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
               self.benchmarking_processor.process
           ]
   ```
-- At the end summary is generated
-  ```py 
-    self.steps_after_end = [
-              self.save_summary_csv
-      ]
-  ```
+#### Ad hoc transforms
+
+- To transfrom the ScanNet's axis and realtive pose conventions to the convention assumed in our implementation the data is passed through this step of the pipeline. It's defined in `AdHocTransforms` in `visn/process/pipeline.py`
 
 #### 
+
 
 
 
