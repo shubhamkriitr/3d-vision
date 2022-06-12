@@ -56,7 +56,17 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 - Make sure your default python version is `3.9.5`
   - Install `pybind11` in your python environment
     - `pip install pybind11`
--  
+- Copy the `Eigen` folder (which is inside extracted `eigen-3.4.0` directory) to `/usr/local/include/`
+  - `sudo cp -r eigen-3.4.0/Eigen/ /usr/local/include/`
+  - Run the following commands
+    ```sh
+    mkdir _build
+    cmake -S . -B _build/ -DPYTHON_PACKAGE=ON -DWITH_BENCHMARK=ON -DCMAKE_INSTALL_PREFIX=_install
+    cmake --build _build/ --target install -j 8
+    cmake --build _build/ --target pip-package
+    cmake --build _build/ --target install-pip-package
+    ```
+
 
 
 
