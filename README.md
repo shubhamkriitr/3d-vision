@@ -40,11 +40,11 @@ The following is a quick overview of the steps to reproduce the results. Please 
   - `visn/main.py` is the entry point for running the pipeline
 ### Directory Structure
 
-
+(TODO)
 ---
 ## Building Poselib Python Library
 
-We have added a 3-point estimator class to the existing PoseLib library, which is essentially a class that combines already implemented 3-point solver, RANSAC and bundle adjustment. The final wheel file will be generated once you execute the following steps. (However we have also attached the final wheel file `TODO:whl file path` so you can quickstart by skipping the following build steps)
+We have added a 3-point estimator class to the existing PoseLib library, which is essentially a class that combines already implemented 3-point solver, RANSAC and bundle adjustment. The final wheel file will be generated once you execute the following steps. (However we have also attached the final wheel file located at `artifacts/poselib-2.0.0-cp39-cp39-linux_x86_64.whl` so you can quickstart by skipping the following build steps)
 
 > Steps to build
 
