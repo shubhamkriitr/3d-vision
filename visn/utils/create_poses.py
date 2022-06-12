@@ -1,3 +1,6 @@
+# Extract ground truth poses from original ScanNet data and add them to
+# the UprightNet ScanNet data
+
 from pathlib import Path
 
 import sys
@@ -12,20 +15,11 @@ from os.path import isfile, join
 
 from distutils.dir_util import copy_tree
 
-normal_list_path = "/media/timo/LaCie1/scannet/test_scannet_normal_list.txt"
+normal_list_path = "/media/timo/LaCie1/scannet/test_scannet_normal_list.txt"  # list has to contain original ScanNet data instead of UprightNet data (http://kaldir.vc.in.tum.de/scannet/download-scannet.py)
+target_path = "/media/timo/LaCie1/scannet/our_data/" # folder where ground truth poses are saved to
+
 with open(normal_list_path) as f:
     normal_list = f.read().splitlines()
-
-"""textfile_pred = open("/media/timo/LaCie1/scannet/test_scannet_normal_list_short.txt", "w")
-for example_string in normal_list:
-    output_data_folder = example_string.split("/normal_pair/", 1)[0]
-    image_data_folder = output_data_folder + "/normal_pair"
-    scene_folder = output_data_folder.split("/data/", 1)[1]
-    output_data_folder = "/media/timo/LaCie1/scannet/our_data/" + scene_folder
-    if(path.exists(output_data_folder)):
-        textfile_pred.write(example_string + "\n")
-textfile_pred.close()"""
-
 
 #example_string = "/media/timo/LaCie1/scannet/data/scene0144_01/normal_pair/0.png"
 for example_string in normal_list:
@@ -34,10 +28,10 @@ for example_string in normal_list:
     image_data_folder = output_data_folder + "/normal_pair"
     scene_folder = output_data_folder.split("/data/", 1)[1]
 
-    if(not path.exists("/media/timo/LaCie1/scannet/our_data/" + scene_folder)):
-        copy_tree(output_data_folder, "/media/timo/LaCie1/scannet/our_data/" + scene_folder)
+    if(not path.exists(target_path + scene_folder)):
+        copy_tree(output_data_folder, target_path + scene_folder)
 
-    output_data_folder = "/media/timo/LaCie1/scannet/our_data/" + scene_folder
+    output_data_folder = target_path + scene_folder
     image_data_folder = output_data_folder + "/normal_pair"
 
     input_folder = example_string.split("/data/", 1)[0] + "/scans/" + scene_folder + "/" + scene_folder + ".sens"

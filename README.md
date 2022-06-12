@@ -54,8 +54,32 @@ The final wheel file will be generated once you executre the following steps. (H
 
 ### Predicting Gravity
 
+1. Download and extract from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw:
+	checkpoints.zip (pretrained weights)
+	
+2. Copy checkpoints folder to root directory of UprightNet repo
+
+   If your computer does not have an gpu, check out the branch "no-gpu".
+
 ### Processing Scannet Data
 
+1. Download and extract from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw:
+	a) ScanNet.zip (for UprightNet preprocessed ScanNet data)
+	b) checkpoints.zip (pretrained weights)
+	c) test_scannet_normal_list.txt (List with ScanNet test data)
+	
+2. Adapt the paths of test_scannet_normal_list.txt to the path of ScanNet data (e.g. with find&replace)
+
+3. Copy checkpoints folder to root directory of UprightNet repo
+
+4. Adapt DATA_PATH in util/config.py to be the directory where test_scannet_normal_list.txt is located
+
+5. To add the predicted gravity vector to the data folders, run
+	python3 test.py --mode ResNet --dataset scannet
+	
+	Each scene folder should now contain 4 new folders: pose_pred, pose_gt, gravity_pred, gravity_gt
+
+	If your computer does not have an gpu, check out the branch "no-gpu".
 
 ---
 ## Running the pipeline
