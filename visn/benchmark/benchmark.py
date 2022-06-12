@@ -2,6 +2,8 @@ from visn.utils import logger
 import time
 
 class BenchMarker(object):
+    """It contains utility functions to compare metrics like runtime etc.
+    """
     def __init__(self, config=None) -> None:
         self.config = config
         self.default_num_trials = 1000
@@ -40,6 +42,10 @@ class BenchMarker(object):
         return exec_times_ns
     
     def normalize_values(self, values: list, mode:str = "first_element"):
+        """Scales values in a list based on the provided mode.
+        It is to be used for comparing metrics by converting absolute values
+        to ratio.
+        """
         if len(values) == 0:
             return values
         if mode == "first_element":
@@ -55,6 +61,10 @@ class BenchMarker(object):
     
     def get_runtime_ns(self, f, args: list, kwargs: dict,
                        num_trials=None):
+        """It executes `f` with provided `args` and `kwargs` as inputs,
+        for `num_trials` times, and returns the average runtime in
+        nano seconds.
+        """
         if num_trials is None:
             num_trials = self.default_num_trials
         total_time = 0
