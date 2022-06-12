@@ -140,15 +140,38 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
   - generates a `.csv` file containing metrics like pose error, runtime, inliers and ransac iterations
 
 
-```py
-self.steps = [
-            AdHocTransforms().process,
-            self.angle_manipulator_processor.process,
-            self.preprocessor.process,
-            self.pose_estimation_processor.process,
-            self.benchmarking_processor.process
-        ]
-```
+> Following are the details of the steps involved
+
+#### Data loading
+
+
+- `GroupedImagesDataset` from ``visn/data/loader.py`` is the dataset class 
+- and `SequentialDataLoader` is the loader used to feed the data batches to the pipeline
+
+#### Pipeline
+
+- `BasePipeline` in `visn/process/pipeline.py`, brings all the steps of the pipeline together and provides a shared execution context
+- To initialize it loads its config from `visn/config/config.json`
+- For each batch of data is applies a sequence of steps on them
+  - Note: To make the outputs of previous steps available to the next steos, in our implementation, at each step we process the inputs (which are list of dictionaries) and store the results back in the same dictionary. 
+- The following is a snippet from `BasePipeline` which shows the steps through which each batch of data (and results-so-far) will flow
+  ```py
+  self.steps = [
+              AdHocTransforms().process,
+              self.angle_manipulator_processor.process,
+              self.preprocessor.process,
+              self.pose_estimation_processor.process,
+              self.benchmarking_processor.process
+          ]
+  ```
+- At the end summary is generated
+  ```py 
+    self.steps_after_end = [
+              self.save_summary_csv
+      ]
+  ```
+
+#### 
 
 
 
