@@ -88,12 +88,25 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 
 ### Processing Scannet Data
 
-1. Download and extract from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw:
-	a) ScanNet.zip (for UprightNet preprocessed ScanNet data)
-	b) checkpoints.zip (pretrained weights)
-	c) test_scannet_normal_list.txt (List with ScanNet test data)
+### Predicting Gravity
+
+1. Download and extract from https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG?usp=sharing:
+	checkpoints.zip (pretrained weights)
 	
-2. Adapt the paths of test_scannet_normal_list.txt to the path of ScanNet data (e.g. with find&replace)
+2. Copy checkpoints folder to root directory of UprightNet repo
+
+   If your computer does not have an gpu, check out the branch "no-gpu".
+
+### Processing Scannet Data
+
+1. Download and extract from https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG?usp=sharing:
+	a) sample_data.zip (for UprightNet preprocessed ScanNet data)
+	b) checkpoints.zip (pretrained weights)
+	
+  Alternatively you can use 
+    d) ScanNet.zip and test_scannet_normal_list.txt from https://drive.google.com/drive/folders/1WdNAESqDYcUPQyXAW6PvlcdQIYlOEXIw instead of a), which contains all scenes.
+
+2. Adapt the paths of sample_data/test_scannet_normal_list.txt to the path of sample_data (e.g. with find&replace)
 
 3. Copy checkpoints folder to root directory of UprightNet repo
 
