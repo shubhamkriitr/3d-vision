@@ -16,16 +16,7 @@ We have tested our code in an environment with the following specifications:
 - Python Version: `3.7.11`
 
 Besides this, UprightNet model training was done on a node with GPU (`NVIDIATITANRTX`).
-## Creating isolated execution environment
-- Go to the `src` directory
-- Execute the following in sequence (enter yes when prompted):
-```
-conda create -n ml4hc_ais python==3.7.11
-conda activate ml4hc_ais
-pip install -r requirements.txt
-```
-- Now the environment should be ready
-- Make sure to check that the environment is activated before running the code
+
 
 ## Overview
 
@@ -47,10 +38,10 @@ The following is a quick overview of the steps to reproduce the results. Please 
   - (TODO)
 - Executing the pipeline
   - `visn/main.py` is the entry point for running the pipeline
-## Code Structure
+### Code Structure
 
 
-
+---
 ## Building Poselib Python Library
 
 We have added a 3-point estimator to the existing PoseLib library (`TODO:Path`).
@@ -58,14 +49,35 @@ The final wheel file will be generated once you executre the following steps. (H
 
 
 
-## Install the generated wheel file
+---
+## Running UprightNet
+
+### Predicting Gravity
+
+### Processing Scannet Data
+
+
+---
+## Running the pipeline
+
+### Preparing the execution environment
+- Go to the `3d-vision` (TODO-name it correctly) directory
+- Execute the following in sequence (enter yes when prompted):
+```
+conda create -n 3dvis-py3-9-5 python==3.9.5
+conda activate 3dvis-py3-9-5
+pip install -r requirements.txt
+```
+- Now the environment should be ready
+- Make sure to check that the environment is activated before running the code
+stt
+#### Install the generated wheel file
 
 - Run the following
 ```sh
 ```
 
-## Running the pipeline
-
+### Summary of pipeline steps
 - Go to the `threedvis` folder. There run the command `PYTHONPATH=. python visn/main.py`
   - This will run the whole pipeline which has the following steps
     - It will load the data
@@ -77,18 +89,15 @@ The final wheel file will be generated once you executre the following steps. (H
     - Pose error is computed w.r.t. the ground truth pose for both sets of the estimations
     - These errors , runtimes, and RANSAC parameters are logged into a csv file
 
-
-
-## Interpreting the results
+### Interpreting the results
 
 
 ---
 
-# Other steps of the pipeline
+## Miscellaneous
 
-# Predicting Gravity
+### Training UprightNet
 
 
-# Processing Scannet Data
 
 
