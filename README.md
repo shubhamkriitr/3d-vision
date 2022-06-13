@@ -38,9 +38,23 @@ The following is a quick overview of the steps to reproduce the results. Please 
 - Executing the pipeline
   - `visn/main.py` is the entry point for running the pipeline
 
-### Directory Structure
+### Handing directory structure
 
-(TODO)
+```
+handin_root/
+├── 3d-vision
+│   ├── UprightNet      [Gravity estimation]
+│   └── visn            [Comparison Pipeline]
+├── artifacts           [Resources for quickstart]
+│   ├── checksums.txt
+│   ├── eigen-3.4.0.zip
+│   └── poselib-2.0.0-cp39-cp39-linux_x86_64.whl
+├── burgern_kumarsh_timoscho_ywibowo_3D_Vision_report.pdf.pdf
+└── poselib-3dv         [3-Point Estimator C++ / pybind]
+
+```
+
+
 ---
 ## Building Poselib Python Library
 
