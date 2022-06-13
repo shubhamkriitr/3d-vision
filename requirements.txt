@@ -16,6 +16,9 @@ PyYAML==6.0
 scikit-learn==1.0.2
 setuptools==62.0.0
 tqdm==4.64.0
+scikit-image==0.19.3
+torch==1.11.0
+tensorboardX==2.5.1
 tox
 pytest
 coverage
