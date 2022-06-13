@@ -58,7 +58,6 @@ class PoseEstimator(object):
     @property
     def estimate_relative_pose_5pt(self):
         # Use this for benchmarking
-        # TODO: make sure that this wrapping does not affect the comparison
         return poselib.estimate_relative_pose
     
     @property
