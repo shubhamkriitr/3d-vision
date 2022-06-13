@@ -120,7 +120,7 @@ If your computer does not have an gpu, check out the branch "no-gpu" in the 3d-v
 
 5. To add the predicted gravity vector to the scene folders, in UprightNet run
     `python3 test.py --mode ResNet --dataset scannet`
-	
+   (this will take around 10-15 min)
     Each scene folder in sample_data/data should now contain 4 new folders: pose_pred, pose_gt, gravity_pred, gravity_gt
 
 6. To get the data structure needed for the pose prediction, adapt in 3d-vision/visn/utils/create_data_folder.py 
