@@ -4,7 +4,7 @@
 
 We expect everything to work on an isolated python environment created 
 as per the instructions below, but in case you face any issues running
-the code please feel free to contact us (burgern@ethz.ch, kumarsh@ethz.ch,
+the code please feel to contact us (burgern@ethz.ch, kumarsh@ethz.ch,
 timoscho@ethz.ch, and ywibowo@ethz.ch).
 
 We have tested our code in an environment with the following specifications:
@@ -36,7 +36,7 @@ The following is a quick overview of the steps to reproduce the results. Please 
 - ScanNet data preprocessing
   - We augment the ScanNet data for our pose estimation evaluation pipeline. The staps to augment the ScanNet data are described in the section "Processing Scannet Data".
 - Executing the pipeline
-  - `visn/main.py` is the entry point for running the pipeline
+  - `3d-vision/visn/main.py` is the entry point for running the pipeline
 
 ### Handin directory structure
 
@@ -49,7 +49,7 @@ handin_root/
 │   ├── checksums.txt
 │   ├── eigen-3.4.0.zip
 │   └── poselib-2.0.0-cp39-cp39-linux_x86_64.whl
-├── burgern_kumarsh_timoscho_ywibowo_3D_Vision_report.pdf.pdf
+├── burgern_kumarsh_timoscho_ywibowo_3D_Vision_report.pdf
 └── poselib-3dv         [3-Point Estimator C++ / pybind]
 
 ```
@@ -184,7 +184,7 @@ __Ad hoc transforms__
 
 __Angle manipulation__
 
-- It creates (perturbed) gravity estimates with varying degrees of errors. It id defined in `AngleManipulatorProcessor` in  in `visn/process/pipeline.py`
+- It creates (perturbed) gravity estimates with varying degrees of errors. It is defined in `AngleManipulatorProcessor`  in `visn/process/pipeline.py`
 
 __Preprocessing__
 
@@ -228,7 +228,6 @@ __Interpreting the results__
 
 ## Miscellaneous
 
-### Training UprightNet
 
 
 
