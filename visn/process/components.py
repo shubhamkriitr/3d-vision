@@ -442,13 +442,22 @@ class PoseEstimationProcessor(BasePreprocessor):
     
     def prune_solution_metadata(self, solution_metadata):
         """ 
-        
+        `solution_metadata` contains RANSAC run information, like inliers,
+        number of inliers, number of iterations to converge etc.
+        This method keeps only relevant information and removes `inliers` 
+        attribute as it is not required for report generation.
         """
         return {k:v for k, v in solution_metadata.items() if k != "inliers"}
 
 
 
 class BenchmarkingProcessor(BasePreprocessor):
+    """This class brings together metrics functions and runtime measurement
+    function, and uses the pose estimations and ground truth data to 
+    record pose errors. Using runtime measurement function it also
+    calls the pose estimators again for multiple number of times (>>>currently
+    set to 20) to get the average run time, and logs it.
+    """
     def __init__(self, config=None, **kwargs) -> None:
         super().__init__(config, **kwargs)
         if "pipeline" in kwargs:
@@ -464,7 +473,15 @@ class BenchmarkingProcessor(BasePreprocessor):
         self.pipeline_stage = "_stage_benchmark"
     
     def process_one_sample(self, sample):
+        """ It use previously computed data like aligned keypoints etc.
+        which is available in the input `sample` (dictionary) to call
+        the 3-point/5-point relative pose algorithms again to estimate their
+        average runtime for the given sample. Besides this it also calls
+        `log_pose_errors` to store pose error and runtime information in the 
+        `sample["_stage_benchmark]` dictionary.  
         
+        Also see: `log_pose_errors`
+        """
         # runtimes in nano seconds
         args_kwargs_for_3pt_up = [
             # args
@@ -570,6 +587,9 @@ class BenchmarkingProcessor(BasePreprocessor):
     
     @property 
     def _schema(self):
+        """It justs visually documents the output structure, that is added
+        to the input `sample` (check `process_one_sample` method for details.)
+        """
         return {
             self.pipeline_stage  : {
                 "runtimes_ns": None,
