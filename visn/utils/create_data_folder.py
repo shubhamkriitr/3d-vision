@@ -9,8 +9,8 @@ import shutil
 
 from distutils.dir_util import copy_tree
 
-our_data_path = "/media/timo/LaCie1/scannet/our_data" # scene folders with predicted UprightNet data
-visn_data_path = "/media/timo/LaCie1/scannet/visn" # target folder
+our_data_path = "/home/nico/code/ETHZ/3DV/3d-vision/UprightNet/sample_data/data" # scene folders with predicted UprightNet data
+visn_data_path = "/home/nico/code/ETHZ/3DV/3d-vision/visn/data_generated" # target folder
 
 # get all scenes with data
 scene_names = []

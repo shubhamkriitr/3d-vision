@@ -65,10 +65,14 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 > Steps to build
 
 - Go inside `poselib-3dv` directory
-- Extract `../artifacts/eigen-3.4.0.zip` to the current folder (Note: `eigen-3.4.0.zip` was downloaded from https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip )
+- Extract `../artifacts/eigen-3.4.0.zip` to the current folder (Note: `eigen-3.4.0.zip` was downloaded from https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip ).
+  ```sh
+  sudo apt-get install unzip
+  unzip ../artifacts/eigen-3.4.0.zip
+  ```
 - Make sure your default python version is `3.9.5`
   - Install `pybind11` in your python environment
-    - `pip install pybind11`
+    `pip install pybind11`
 - Copy the `Eigen` folder (which is inside extracted `eigen-3.4.0` directory) to `/usr/local/include/`
   - `sudo cp -r eigen-3.4.0/Eigen/ /usr/local/include/`
   - Run the following commands
@@ -92,11 +96,15 @@ We have added a 3-point estimator class to the existing PoseLib library, which i
 ---
 ## Running UprightNet
 
+- install the requirements in your python 3.9.5 environment (from 3d-vision/requirements.txt)
+
+`pip install -r requirements.txt`
+
 - Download the pretrained weights from [here](https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing): https://drive.google.com/file/d/15ZIFwPHP9W50YnsM4JPQGrlcvOeM3fM4/view?usp=sharing
 
-- Copy the weights to the folder UprightNet/checkpoints/test_local/
+- Copy the weights to the folder 3d-vision/UprightNet/checkpoints/test_local/
 
-If your computer does not have an gpu, check out the branch "no-gpu".
+If your computer does not have an gpu, check out the branch "no-gpu" in the 3d-vision/UprightNet repo.
 
 
 ### Processing Scannet Data
@@ -104,21 +112,21 @@ If your computer does not have an gpu, check out the branch "no-gpu".
 1. Download the pretrained weights as described in the section above.
 
 2. Download and extract from https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG?usp=sharing:
-	  sample_data.zip (for UprightNet preprocessed ScanNet data)
+      sample_data.zip (for UprightNet preprocessed ScanNet data)
 	
-3. Copy the sample_data folder into the root directry of the UprightNet repo (same level as folder checkpoints)
+3. Copy and extract the sample_data folder into the root directry of the 3d-vision/UprightNet repo (same level as folder checkpoints)
 
-4. Adapt DATA_PATH in util/config.py to be the absolute path of the directory where test_scannet_normal_list.txt is located
+4. Adapt DATA_PATH in 3d-vision/UprightNet/util/config.py to be the absolute path of the directory sample_data (we need to know where test_scannet_normal_list.txt is located)
 
-5. To add the predicted gravity vector to the scene folders, run
-	python3 test.py --mode ResNet --dataset scannet
+5. To add the predicted gravity vector to the scene folders, in UprightNet run
+    `python3 test.py --mode ResNet --dataset scannet`
 	
-	Each scene folder in sample_data/data should now contain 4 new folders: pose_pred, pose_gt, gravity_pred, gravity_gt
+    Each scene folder in sample_data/data should now contain 4 new folders: pose_pred, pose_gt, gravity_pred, gravity_gt
 
 6. To get the data structure needed for the pose prediction, adapt in 3d-vision/visn/utils/create_data_folder.py 
   - the variable "our_data_path" to be the path where the scene data is located (should be sth like .../sample_data/data)
-  - the variable "visn_data_path" to be the folder where the new scene folders should be created
-  - Run "python3 create_data_folder.py"
+  - the variable "visn_data_path" to be the folder where the new scene folders should be created. This can be any folder, which we will use later to add data to the pipeline.
+  - Run `python3 create_data_folder.py` (from 3d-vision/visn/utils)
 
 You should now have the same data as `ready_for_visn.zip` in https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.   (the submitted `artifacts/scene0025_01.zip` in the `handin_root` is a processed scene from this set)
 
@@ -128,7 +136,7 @@ You should now have the same data as `ready_for_visn.zip` in https://drive.googl
 ### Preparing the execution environment
 - Go to the `3d-vision` directory
 
-- Install the requirements in your `python 3.9.5` environment
+- Install the requirements in your `python 3.9.5` environment (if not done already)
   - `pip install -r requirements.txt`
 - Make sure that `poselib` wheel package generated earlier is also installed in this environment
 
