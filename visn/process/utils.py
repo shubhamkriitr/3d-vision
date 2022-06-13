@@ -2,7 +2,12 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 def compute_alignment(source_vector, target_vector):
-    """`source_vector` and `target_vector` are of shape (1, 3)
+    """
+    Input
+    `source_vector` and `target_vector` are of shape (1, 3)
+    Output
+    `nortmal_unit_vector`: the normal between `source_vector` and `target vector`
+    `theta`: the absolute dedgree between `source_vector` and `target vector`
     """
     normal_vector = np.cross(source_vector, target_vector)
     if np.allclose(normal_vector, 0., rtol=1e-8, atol=1e-8):
@@ -41,7 +46,9 @@ def compute_alignment_rotation(source_vector, target_vector):
     return R[0] # shape (3, 3)
 
 def compute_relative_pose(reference_absolute_pose, target_absolute_pose):
-    
+    """
+    Calculate the relative pose from reference to target
+    """
     R1, t1 = reference_absolute_pose[:, 0:3], reference_absolute_pose[:, 3:4]
     R2, t2 = target_absolute_pose[:, 0:3], target_absolute_pose[:, 3:4]
 
