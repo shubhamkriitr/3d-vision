@@ -120,7 +120,7 @@ If your computer does not have an gpu, check out the branch "no-gpu".
   - the variable "visn_data_path" to be the folder where the new scene folders should be created
   - Run "python3 create_data_folder.py"
 
-You should now have the same data as "ready_for_visn.zip" in https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.
+You should now have the same data as `ready_for_visn.zip` in https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.   (the submitted `artifacts/scene0025_01.zip` in the `handin_root` is a processed scene from this set)
 
 ---
 ## Running the pipeline
