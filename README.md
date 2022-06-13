@@ -111,7 +111,7 @@ If your computer does not have an gpu, check out the branch "no-gpu" in the 3d-v
 
 1. Download the pretrained weights as described in the section above.
 
-2. Download and extract from https://drive.google.com/file/d/1EofTs0XJpGu3a2ppuFMxmZ_DMXWAxxaQ/view?usp=sharing :
+2. Download and extract from [here](https://drive.google.com/file/d/1EofTs0XJpGu3a2ppuFMxmZ_DMXWAxxaQ/view?usp=sharing) https://drive.google.com/file/d/1EofTs0XJpGu3a2ppuFMxmZ_DMXWAxxaQ/view?usp=sharing :
       sample_data.zip (for UprightNet preprocessed ScanNet data)
 	
 3. Copy and extract the sample_data folder into the root directry of the 3d-vision/UprightNet repo (same level as folder checkpoints)
@@ -128,7 +128,7 @@ If your computer does not have an gpu, check out the branch "no-gpu" in the 3d-v
   - the variable "visn_data_path" to be the folder where the new scene folders should be created. This can be any folder, which we will use later to add data to the pipeline.
   - Run `python3 create_data_folder.py` (from 3d-vision/visn/utils)
 
-You should now have the same data as `ready_for_visn.zip` in https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.   (the submitted `artifacts/scene0011_00.zip` in the `handin_root` is a processed scene from this set)
+You should now have the same data as `ready_for_visn.zip` in [google drive](https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG) https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.   (the submitted `artifacts/scene0011_00.zip` in the `handin_root` is a processed scene from this set)
 
 ---
 ## Running the pipeline
