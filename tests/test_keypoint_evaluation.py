@@ -1,3 +1,16 @@
+# Compute the good-bad-keypoint ratio and plot the good keypoints
+# This is computed given the true relative pose and making use of the epipolar
+# distance, as well as an epsilon threshold which separates good from bad
+# keypoints. Currently not reliable due to the used KeypointMatchBenchmarker
+# which is faulty.
+
+""" enter parameters """
+instance_nr = 0
+kp_matching_ratio = 1
+epsilon = 50
+
+""" run test """
+
 from visn.data.loader import GroupedImagesDataset
 from visn.estimation.keypoint import OpenCvKeypointMatcher, KeypointMatchBenchmarker
 import matplotlib.pyplot as plt
@@ -8,14 +21,14 @@ dataset = GroupedImagesDataset()
 kpm = OpenCvKeypointMatcher({})
 
 # load and process data
-data_batch = dataset[0]
+data_batch = dataset[instance_nr]
 img_1 = data_batch["input_images"][0]
 img_2 = data_batch["input_images"][1]
-keypoints_1, keypoints_2 = kpm.get_matches(img_1, img_2, ratio=1)
+keypoints_1, keypoints_2 = kpm.get_matches(img_1, img_2, ratio=kp_matching_ratio)
 
 # use benchmarker for checking % of good matches (score)
-kpt_benchmarker = KeypointMatchBenchmarker(data_batch["input_relative_poses"], data_batch["input_k"])
-inliers, score = kpt_benchmarker.check(keypoints_1, keypoints_2, epsilon=0.02)
+kpt_benchmarker = KeypointMatchBenchmarker(data_batch["input_relative_poses"], data_batch["K"])
+inliers, score = kpt_benchmarker.check(keypoints_1, keypoints_2, epsilon=epsilon)
 print(f"inlier / outlier Ratio: {score}")
 
 # remove outliers

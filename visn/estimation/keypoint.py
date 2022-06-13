@@ -67,13 +67,18 @@ class OpenCvKeypointMatcher(KeyPointMatcher):
 
 
 class KeypointMatchBenchmarker:
+    """ The KeypointMatchBenchmarker shall allow to extract information about
+        how many good keypoint matches were made. This is implemented by
+        computing the epipolar distance of each respective keypoint match.
+        The epsilon parameter then acts as a threshold and uses this information
+        to compute the ratio of good vs bad keypoints.
+    """
+    # FIXME currently non-reliable, some sort of bug mixed in
     def __init__(self, relative_pose: List[List[float]], k: List[List[float]]):
-        # FIXME we got one or multiple bugs
-        # TODO Nico
         # This can be used for the pipeline so far as a pseudo-Benchmarker
         self.rel_pose_0 = np.array(relative_pose[0])
         self.rel_pose_1 = np.array(relative_pose[1])
-        self.k = np.array(k)
+        self.k = np.array(k)[0]
         self.k_inv = np.linalg.inv(self.k)
 
         # compute relative pose from image 0 to image 1
@@ -88,7 +93,7 @@ class KeypointMatchBenchmarker:
                                             [-self.trans_0_to_1[1], self.trans_0_to_1[0], 0]])
         self.F = self.rot_0_to_1 @ self.trans_0_to_1_cross
         self.E = self.k_inv.T @ self.F @ self.k_inv
-        self.E = self.E * np.linalg.norm(self.E)  # normalize with respect to frobenius norm
+        self.E = self.E / np.linalg.norm(self.E)  # normalize with respect to frobenius norm
 
     @staticmethod
     def rel_pose_a_to_b(pose_a, trans_a, pose_b, trans_b):
