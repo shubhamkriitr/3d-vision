@@ -1,7 +1,7 @@
 {
   "dataset": {
     "object": "GroupedImagesDataset",
-    "resource_scene": "scenes/scene0025_01",
+    "resource_scene": "scenes/scene0011_00",
     "same_intrinsic_matrix_for_all": true,
     "use_prediction": true
   },

@@ -47,9 +47,9 @@ handin_root/
 │   └── visn            [Comparison Pipeline]
 ├── artifacts           [Resources for quickstart]
 │   ├── checksums.txt
-│   ├── eigen-3.4.0.zip scene0025_01.zip
+│   ├── eigen-3.4.0.zip
 │   ├── poselib-2.0.0-cp39-cp39-linux_x86_64.whl
-│   └── scene0025_01.zip       [Sample data to test the pipeline on]
+│   └── scene0011_00.zip       [Sample data to test the pipeline on]
 |
 ├── burgern_kumarsh_timoscho_ywibowo_3D_Vision_report.pdf
 └── poselib-3dv         [3-Point Estimator C++ / pybind]
@@ -128,7 +128,7 @@ If your computer does not have an gpu, check out the branch "no-gpu" in the 3d-v
   - the variable "visn_data_path" to be the folder where the new scene folders should be created. This can be any folder, which we will use later to add data to the pipeline.
   - Run `python3 create_data_folder.py` (from 3d-vision/visn/utils)
 
-You should now have the same data as `ready_for_visn.zip` in https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.   (the submitted `artifacts/scene0025_01.zip` in the `handin_root` is a processed scene from this set)
+You should now have the same data as `ready_for_visn.zip` in https://drive.google.com/drive/folders/1V2KIsXIZ-2-5kGDaErTIpRNnBV2zhVjG.   (the submitted `artifacts/scene0011_00.zip` in the `handin_root` is a processed scene from this set)
 
 ---
 ## Running the pipeline
@@ -141,7 +141,7 @@ You should now have the same data as `ready_for_visn.zip` in https://drive.googl
 - Make sure that `poselib` wheel package generated earlier is also installed in this environment
 
 ### Running the pipeline (to compare 3-point with 5-point estimator)
-- Extract the contents of `artifacts/scene0025_01.zip` to `3d-vision/resources/scenes`
+- Extract the contents of `artifacts/scene0011_00.zip` to `3d-vision/resources/scenes`
 - Go to the `3d-vision` folder. There run the command `PYTHONPATH=. python visn/main.py`
 - In summary, it does the following
   - loads the dataset (which contains images, corresponding intrinsic matrices, gravity vectors, ground truth relative pose etc. )
@@ -161,13 +161,13 @@ __Data loading__
 
 - `GroupedImagesDataset` from ``visn/data/loader.py`` is the dataset class 
 - and `SequentialDataLoader` is the loader used to feed the data batches to the pipeline
-- By default dataset from `resources/scenes/scene0025_01` will be loaded.
+- By default dataset from `resources/scenes/scene0011_00` will be loaded.
 - To switch dataset folder change `resource_scene` attribute in `visn/config/config.json`
   - snippet from `visn/config/config.json`
     ```json
     "dataset": {
         "object": "GroupedImagesDataset",
-        "resource_scene": "scenes/scene0025_01",
+        "resource_scene": "scenes/scene0011_00",
         "same_intrinsic_matrix_for_all": true,
         "use_prediction": true
       }
