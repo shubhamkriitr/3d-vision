@@ -8,6 +8,8 @@ import math
 DEFAULT_SUBPLOT_CODE = 111
 
 class BaseVisualizer:
+    """Utility functions to plot camera, keypoints, vectors etc.
+    for debugging and sanity check"""
     def __init__(self) -> None:
         self._id = 1
     
