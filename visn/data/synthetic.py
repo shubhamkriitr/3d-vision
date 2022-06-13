@@ -5,12 +5,18 @@ import shutil
 import matplotlib
 import imageio
 from visn.utils import logger
+
+
 class SyntheticDataGenerator(object):
     def __init__(self) -> None:
         pass
     
 
 class CameraPairDataGenerator(SyntheticDataGenerator):
+    """ Used for generating synthetic data for test cases. This approach allows
+        for absolute knowledge of keypoint matches as well as relative pose.
+        This feature is used to test the pipeline and helps with debugging.
+    """
     def __init__(self, config={}) -> None:
         super(CameraPairDataGenerator, self).__init__()
         self.config = config # not being used currently TODO
@@ -153,8 +159,13 @@ ALL_VISN_DIRS = [
     DIR_ROLL_PITCH_PRED,
     DIR_MATCHED_KEY_POINTS
 ]
+
+
 class SyntheticVisnDataGenerator(object):
-    
+    """ Used for generating synthetic data for test cases. This approach allows
+        for absolute knowledge of keypoint matches as well as relative pose.
+        This feature is used to test the pipeline and helps with debugging.
+    """
     def __init__(self) -> None:
         pass
     

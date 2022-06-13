@@ -10,13 +10,10 @@ import numpy as np
 import cv2
 import random
 
-
-
 logger = logging.getLogger(name=__name__)
 
 
 class BaseDataTransformer:
-
     def __init__(self, config=None) -> None:
         self.default_config = {}
         if config is not None:
@@ -28,7 +25,17 @@ class BaseDataTransformer:
         raise NotImplementedError()
 
 class ScanNetTrainingDataTransformer(BaseDataTransformer):
-
+    """ Transform the ScanNet data with either one of the following operations
+        identity transform  ->  no transformation
+        transform_group_a   ->  rotate randomly by predefined angles
+        transform_group_b   ->  horizontal flip
+        transform_group_c   ->  vertical flip
+        transform_group_d   ->  adjust brightness
+        transform_group_e   ->  affine transformation (angle, translation,
+                                                       scaling and shear)
+        each operation is given an initial probability of occurring and one of
+        these groups is then randomly chosen for the transformation
+    """
     def __init__(self, config=None) -> None:
         self.default_config = {
             "group_probs" : [0.5, 0.125, 0.125, 0.125, 0.025, 0.1]
@@ -170,5 +177,3 @@ class AffineTransform:
         return TF.affine(x, angle=angle,
                 translate=translate, scale=scale, shear=shear), \
                     None
-
-#FIXME: Add changes for gravity vector once input format is finalized

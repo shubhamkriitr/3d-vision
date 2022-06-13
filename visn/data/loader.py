@@ -11,10 +11,16 @@ from typing import Dict, List
 from collections import defaultdict
 from visn.config import read_config
 import copy
+
 # TODO: Also see: https://pytorch.org/docs/stable/data.html
 # TODO: move to constants
 DIR_MATCHED_KEY_POINTS = "matched_keypoints"
+
+
 class BaseDataLoader(object):
+    """ Base Dataloader, which allows for loading the requested files and
+        resolve paths
+    """
     def __init__(self, *args, **kwargs) -> None:
         # specific initialization to be handeled in 
         # derived classes
@@ -300,6 +306,9 @@ class GroupedImagesDataset(BaseDataset):
 
         
 class SequentialDataLoader(object): # TODO: may use torch's loader instead
+    """ Load data in a sequential manner used for pipeline application of
+        multiple cases
+    """
     def __init__(self, dataset, config: Dict = {}) -> None:
         self.dataset = dataset
         self._init_from_config(config)
