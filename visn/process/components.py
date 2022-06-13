@@ -48,6 +48,7 @@ class BasePreprocessor(object):
         self.pipeline_stage = self.config["pipeline_stage"]
             
     def process(self, batch_):
+        """It process a batch of data."""
         # Assumes batch_ is a list of dictionaries 
         # {"input": [img_1, img_2, ...],
         # "K": [K_0, K_1, ....]}
@@ -61,6 +62,22 @@ class BasePreprocessor(object):
         return output
 
     def process_one_sample(self, sample):
+        """It processes one sample. `sample` is a dictionary 
+        containing input images, ground truth gravity, ground truth absolute,
+        pose, intrinsic matrix etc.
+        {"input": [img_1, img_2, ...],
+         "K": [K_0, K_1, ....],
+         }
+        
+        It calls helper functions to do the following:
+        - Keypoint detection and matching
+        - Keypoint normalization
+        - Gravity vector computation (if required)
+        - Keypoint alignment (using gravity information)
+        
+        It stores all these resulting values in the same input dictionary
+        `sample`.
+        """
         k_inverse = [np.linalg.inv(k) for k in sample["K"]]
         input_images = sample["input_images"]
         
