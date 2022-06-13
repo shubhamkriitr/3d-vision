@@ -1,0 +1,1 @@
+Place the scene folders (which contains processed data int the format expected by the pipeline) in the folder containing this file.
