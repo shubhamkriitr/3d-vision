@@ -150,13 +150,13 @@ __Data loading__
 
 - `GroupedImagesDataset` from ``visn/data/loader.py`` is the dataset class 
 - and `SequentialDataLoader` is the loader used to feed the data batches to the pipeline
-- By default dataset from `resources/easy_scenes/scene0025_01` will be loaded.
+- By default dataset from `resources/scenes/scene0025_01` will be loaded.
 - To switch dataset folder change `resource_scene` attribute in `visn/config/config.json`
   - snippet from `visn/config/config.json`
     ```json
     "dataset": {
         "object": "GroupedImagesDataset",
-        "resource_scene": "easy_scenes/scene0025_01",
+        "resource_scene": "scenes/scene0025_01",
         "same_intrinsic_matrix_for_all": true,
         "use_prediction": true
       }
