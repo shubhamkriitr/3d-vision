@@ -47,8 +47,10 @@ handin_root/
 │   └── visn            [Comparison Pipeline]
 ├── artifacts           [Resources for quickstart]
 │   ├── checksums.txt
-│   ├── eigen-3.4.0.zip
-│   └── poselib-2.0.0-cp39-cp39-linux_x86_64.whl
+│   ├── eigen-3.4.0.zip scene0025_01.zip
+│   ├── poselib-2.0.0-cp39-cp39-linux_x86_64.whl
+│   └── scene0025_01.zip       [Sample data to test the pipeline on]
+|
 ├── burgern_kumarsh_timoscho_ywibowo_3D_Vision_report.pdf
 └── poselib-3dv         [3-Point Estimator C++ / pybind]
 
@@ -131,6 +133,7 @@ You should now have the same data as "ready_for_visn.zip" in https://drive.googl
 - Make sure that `poselib` wheel package generated earlier is also installed in this environment
 
 ### Running the pipeline (to compare 3-point with 5-point estimator)
+- Extract the contents of `artifacts/scene0025_01.zip` to `3d-vision/resources/scenes`
 - Go to the `3d-vision` folder. There run the command `PYTHONPATH=. python visn/main.py`
 - In summary, it does the following
   - loads the dataset (which contains images, corresponding intrinsic matrices, gravity vectors, ground truth relative pose etc. )
