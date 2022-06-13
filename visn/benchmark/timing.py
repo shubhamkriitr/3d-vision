@@ -4,6 +4,9 @@ import time
 
 
 def benchmark_runtime(f):
+    """ benchmark the runtime of a function by running it n times. The computed
+        average will then be outputed through the console.
+    """
     n = 1000
     @wraps(f)
     def wrap(*args, **kw):
