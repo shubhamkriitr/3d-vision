@@ -18,6 +18,12 @@ import copy
 class BasePreprocessor(object):
     """This preprocessor works on image pairs. For more than 2 images in 
     a sample, only the first two will be used.
+    This class  brings all the steps of the pipeline together and provides 
+    a shared execution context for the pipeline steps.
+    To make the outputs of previous steps available to the next steps,
+    at each of the pipeline step processes the inputs 
+    (which are list of dictionaries) and
+    store the results back in the same dictionary.
     """
     def __init__(self, config: Dict = {}, **kwargs) -> None:
         self._init_from_config(config)
