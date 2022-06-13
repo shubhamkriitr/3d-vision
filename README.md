@@ -38,7 +38,7 @@ The following is a quick overview of the steps to reproduce the results. Please 
 - Executing the pipeline
   - `visn/main.py` is the entry point for running the pipeline
 
-### Handing directory structure
+### Handin directory structure
 
 ```
 handin_root/
@@ -184,7 +184,7 @@ __Ad hoc transforms__
 
 __Angle manipulation__
 
-- (TODO @Yoga)
+- It creates (perturbed) gravity estimates with varying degrees of errors. It id defined in `AngleManipulatorProcessor` in  in `visn/process/pipeline.py`
 
 __Preprocessing__
 
