@@ -14,7 +14,9 @@ import random
 from tensorboardX import SummaryWriter
 
 class UprightNetWrapper(object):
-
+    """ Wrapper for UprightNet which allows for computing the upright vector
+        used for the 3-point solver in pose estimation.
+    """
     def __init__(self, datapath):
         opt = TestOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
         self.model = create_model(opt, _isTrain=False)

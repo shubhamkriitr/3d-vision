@@ -6,6 +6,7 @@ torch = SimpleNamespace(**{"Tensor": str}) # for typing #FIXME
 
 
 class BaseGravityEstimator(object):
+    """ Estimate gravity vector used for 3-point solver in pose estimation"""
     def __init__(self, config=None, **kwargs) -> None:
         pass
     
