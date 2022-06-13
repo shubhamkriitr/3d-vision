@@ -142,7 +142,7 @@ class BasePreprocessor(object):
                             rotations: List[np.ndarray],
                             images_keypoints: List[np.ndarray]):
         """Assuming keypoints.shape (N, 2) (in homogeneous coordinates) # 
-        and `intrinsic_matrix` os shape (3, 3)
+        and `intrinsic_matrix` of shape (3, 3); it rotates the keypoints.
         """
         output = []
         for image_idx in range(len(images_keypoints)):
@@ -188,6 +188,8 @@ class BasePreprocessor(object):
         """
         `source_vectors` and `target_vectors` are of shape (B, 3). (where 
         `B` is  the batch size)
+        It computes rotations which can move `source_vectors` to the
+        corresponding `target_vectors`.
         """
         B = source_vectors.shape[0]
         rotations = []
@@ -201,7 +203,9 @@ class BasePreprocessor(object):
         return rotations
     
     def _compute_alignment_rotation(self, source_vector, target_vector):
-        """`source_vector` and `target_vector` are of shape (1, 3)
+        """`source_vector` and `target_vector` are of shape (1, 3).
+        It computes rotations which can move `source_vector` to the
+        corresponding `target_vector`
         """
         normal_unit_vector, theta = self.compute_alignment(
             source_vector, target_vector)
@@ -218,6 +222,15 @@ class BasePreprocessor(object):
         return compute_alignment(source_vector, target_vector)
     
     def compute_relative_pose_ground_truth(self, sample, _stage_data):
+        """ 
+        In the input `sample` -> `sample["input_relative_poses"]` is the
+        pose of the cameras w.r.t. to some base reference (we may call
+        it absolute pose). Using these
+        poses, this function computes the relative pose between the two cameras
+        and stores in the `_stage_data` dictionary under attribute name
+        `relative_pose_gt`
+        
+        """
         input_relative_poses = sample["input_relative_poses"]
         
         Rt_0 = np.array(input_relative_poses[0], dtype=np.float64)
