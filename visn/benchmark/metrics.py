@@ -3,6 +3,10 @@ import math
 from visn.utils import logger
 
 def compute_rotation_pose_error(R1_estimated, R_true):
+    """
+    Computes minimun angle difference between the two input 
+    rotations. (Returns angle in radians)
+    """
     R_prod = np.dot(R1_estimated, np.transpose(R_true))
     
     cos_theta = max( min( 1.0, 0.5 * (np.trace(R_prod) - 1.0) ),  -1.0)
@@ -17,6 +21,8 @@ def compute_rotation_pose_error(R1_estimated, R_true):
 
 
 def compute_translation_pose_error(t_est, t_true):
+    """Assuming the two input translation vectors are know up to scale, it 
+    calculates the angle between those two vectors in radians."""
     t_est = t_est.flatten()
     t_true = t_true.flatten()
     eps = 1e-15
@@ -37,6 +43,8 @@ def compute_translation_pose_error(t_est, t_true):
 def compute_pose_error(Rt_estimated, Rt_ground_truth, degrees=False):
     """
     `Rt_estimated` and `Rt_ground_truth` are 3 x 4 projection matrices.
+    Computes rotation error and translation error in radians. (if `degrees`
+    is `True`, then returns the errors in degrees)
     """
     R_e, R_gt = Rt_estimated[:, 0:3], Rt_ground_truth[:, 0:3]
     t_e, t_gt = Rt_estimated[:, 3:4], Rt_ground_truth[:, 3:4]
