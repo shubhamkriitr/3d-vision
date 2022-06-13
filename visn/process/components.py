@@ -414,22 +414,21 @@ class PoseEstimationProcessor(BasePreprocessor):
         
         
     def prepare_initial_camera_models(self, sample, _stage_data):
-        # TODO: may use data in sample/_stage_data .. and add
-        # camera model dicts
+        """ Prepares camera models for the two images by calling the
+          `self.estimator`
+        """
         cam_0 = self.estimator.prepare_cam()
         cam_1 = self.estimator.prepare_cam()
         return cam_0, cam_1
     
     def prepare_ransac_options(self, sample, _stage_data):
-        # TODO: may use data in sample/_stage_data .. and add
-        # ransac parameters information
+        
         ransac_option_3pt_up = self.estimator.prepare_ransac_options()
         ransac_option_5pt = self.estimator.prepare_ransac_options()
         return ransac_option_3pt_up, ransac_option_5pt
     
     def prepare_bundle_options(self, sample, _stage_data):
-        # TODO: may use data in sample/_stage_data .. and add
-        # bundle parameters information
+        
         bundle_option_3pt_up = self.estimator.prepare_bundle_options()
         bundle_option_5pt = self.estimator.prepare_bundle_options()
         return bundle_option_3pt_up, bundle_option_5pt
