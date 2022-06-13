@@ -29,11 +29,17 @@ class KeyPointMatcher(object):
 class OpenCvKeypointMatcher(KeyPointMatcher):
 
     def __init__(self, config):
+        """
+        Init the opencv-based keypoint matcher
+        """
         super().__init__(config)
         self.sift = cv.SIFT_create()
         self.bf = cv.BFMatcher()
     
     def extract_sift_features(self, image: np.ndarray):
+        """
+        Get the keypoints from image input
+        """
         # https://docs.opencv.org/4.x/d0/d13/classcv_1_1Feature2D.html#a7fc43191552b06aa37fbe5522f5b0c71
         # second argument here is mask
         keypoints, descriptors = self.sift.detectAndCompute(image, None)
@@ -52,15 +58,27 @@ class OpenCvKeypointMatcher(KeyPointMatcher):
         return kp1_loc,kp2_loc
     
     def warp_image(self, img, H, k):
+        """
+        Transform the `img' input according to homography `H`. 
+        the intrinsic camera matrix `k` should be known
+        """
         k_inv = np.linalg.inv(k)
         img_warp_matrix = k@H@k_inv
         return cv.warpPerspective(img, img_warp_matrix, (img.shape[1], img.shape[0]))
 
     def warp_feature(self, feat, H):
+        """
+        Transform the keypoints `feat` input according to homography `H`.
+        INput 
+            `feat`: ndarray [N, 3]
+        """
         # feat (n*3), H (3*3)
         return feat@H.T
 
     def load_image(self, path_):
+        """
+        Load an image using openCV function
+        """
         img = cv.imread(path_)
         img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
         return img
@@ -75,6 +93,11 @@ class KeypointMatchBenchmarker:
     """
     # FIXME currently non-reliable, some sort of bug mixed in
     def __init__(self, relative_pose: List[List[float]], k: List[List[float]]):
+        """
+        `relative_pose`: the pose of image 0 and image 1 to the same ground. We use 
+            this data to calculate the essential matrix between image
+        `k`: intrisic camera parameter. The k matrix image0 and image 1 is assumed the same.
+        """
         # This can be used for the pipeline so far as a pseudo-Benchmarker
         self.rel_pose_0 = np.array(relative_pose[0])
         self.rel_pose_1 = np.array(relative_pose[1])
@@ -97,6 +120,14 @@ class KeypointMatchBenchmarker:
 
     @staticmethod
     def rel_pose_a_to_b(pose_a, trans_a, pose_b, trans_b):
+        """
+        Calcualte the relaticve pose (rotataion and  translation) from a to b
+        Input:
+            `pose_a`: rotation pose of object a
+            `pose_b`: rotation pose of object b
+            `trans_a`: translation pose of object a
+            `trans_b`: translation pose of object b 
+        """
         trans_a_to_b = pose_a.T @ (trans_b - trans_a).reshape((3, 1))
         pose_a_to_b = pose_a.T @ pose_b
         rel_pose = np.concatenate((pose_a_to_b, trans_a_to_b), axis=1)
