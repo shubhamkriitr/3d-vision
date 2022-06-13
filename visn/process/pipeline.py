@@ -10,6 +10,17 @@ import os
 from visn.process.utils import compute_relative_pose
 
 class BasePipeline:
+    """This pipeline class brings together multiple steps to do the following:
+    - loads the dataset (which contains images, corresponding intrinsic matrices,
+    gravity vectors, ground truth relative pose etc. )
+    - extracts keypoints and find matches
+    - computes relative by running 3-point estimator and using gravity
+    - computes relative pose using 5-point estimator
+    - compares the runtimes and pose errors for the solutions of both the estimators
+    - generates a .csv file containing metrics like pose error, runtime, inliers and ransac iterations
+      The output will be saved in a timestamped file in pipeline_outputs directory
+       e.g. pipeline_outputs/2022-06-12_201720__run_stats.csv
+    """
     def __init__(self, config: Dict = {}, **kwargs) -> None:
         self._init_from_config(config)
         self.setup_pipeline_steps()
