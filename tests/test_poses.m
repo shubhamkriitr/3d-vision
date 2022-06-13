@@ -1,3 +1,12 @@
+%% Why?
+% This script is used to determine the format of the coordinate system
+% of the ScanNet dataset. This evaluation allowed us to determine that:
+% x_cam: points to the right of the image plane created by the camera
+% y_cam: points downwards w.r.t. the image plane created by the camera
+% z_cam: point into the image plane created by the camera
+% Hence, out of the two presumed cases, Case 2 is the correct one.
+
+
 %% USER TODO BEFORE RUN
 % define path to 3d-vision
 project_path = "/home/nico/code/ETHZ/3d-vision";

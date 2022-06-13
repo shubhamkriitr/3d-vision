@@ -1,3 +1,8 @@
+# Test dataloader by running this snippet
+# Will output input data of first chosen instance-pair
+
+""" run test """
+
 from visn.data.loader import GroupedImagesDataset, SequentialDataLoader
 
 dataset = GroupedImagesDataset()

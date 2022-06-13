@@ -1,3 +1,7 @@
+# Test the current command line handler
+
+""" run test """
+
 import pytest
 from visn.main import CommandLineHandlerV1
 
