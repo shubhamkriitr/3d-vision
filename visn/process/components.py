@@ -608,6 +608,10 @@ class BenchmarkingProcessor(BasePreprocessor):
         
         
 class AngleManipulatorProcessor(BasePreprocessor):
+    """It creates (perturbed) gravity estimates with varying degrees of errors
+    using interpolation.
+    
+    """
     
     def __init__(self, config: Dict = ..., **kwargs) -> None:
         super().__init__(config, **kwargs)
