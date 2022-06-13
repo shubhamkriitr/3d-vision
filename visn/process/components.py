@@ -278,6 +278,13 @@ class Preprocessor(BasePreprocessor):
     
 
 class PoseEstimationProcessor(BasePreprocessor):
+    """ 
+    This class is a component of the pipeline, which computes relative pose
+    solutions using the 3-point/5-point estimators by using keypoint input
+    from the previous step.
+    
+    Look at its `process_one_sample` method for more details.
+    """
     def __init__(self, config: Dict = {}, **kwargs) -> None:
         super().__init__(config, **kwargs)
         self.pipeline_stage = "_stage_pose_estimate"
@@ -287,7 +294,17 @@ class PoseEstimationProcessor(BasePreprocessor):
         self.estimator = PoseEstimator(config=config)
     
     def process_one_sample(self, sample):
-        
+        """ 
+        `sample` is a dictionary containing input (and outputs generated so far
+        in the pipeline). 
+        This function does the following:
+            * prepare RANSAC options, Bundle options and Camera model for
+            the 3-point and 5-point estimators
+            * computes the relative pose solution by calling the respective
+            estimators
+            * stores the resukts back in `sample["_stage_pose_estimate"]`
+            dictionary to make it available to later stages of the pipeline.
+        """
         if self.pipeline_stage not in sample:
             sample[self.pipeline_stage] = {}
         _stage_data = sample[self.pipeline_stage]
