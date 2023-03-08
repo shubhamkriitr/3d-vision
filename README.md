@@ -233,7 +233,7 @@ __Interpreting the results__
 
 - When running the pipeline, a file "pipeline_outputs/..._run_stats.csv" is created.
 - It contains metrics for each image pair: 3pt and 5pt rotation and translation error, the number of iterations, inlier ratio, ...
-- Use the jupyter notebook in "3d-vision/visn/notebooks/Benchmarking.ipynb" to compare 3pt vs. 5pt solver. You need to adapt the relative path and the scenes depending on the files in pipeline_outputs.
+- Use the jupyter notebook in ["3d-vision/visn/notebooks/Benchmarking.ipynb"](https://github.com/shubhamkriitr/3d-vision/blob/d7e64f313e9f9e5c4ab606b7b8cea097c8d5fc05/visn/notebooks/Benchmarking.ipynb) to compare 3pt vs. 5pt solver. You need to adapt the relative path and the scenes depending on the files in pipeline_outputs.
 
 ---
 
